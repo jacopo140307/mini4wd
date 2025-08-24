@@ -3,168 +3,325 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mini4WD Advisor — BETA v3.1</title>
+<title>Mini4WD Advisor — Demo Grafica (Tecnica)</title>
 <style>
-  :root{--ink:#0f172a;--muted:#64748b;--brand:#2563eb;--line:#e2e8f0;--card:#fff}
+  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--ok:#10b981;--warn:#f59e0b;--danger:#ef4444}
   html,body{margin:0;background:#f7f9fc;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
-  .wrap{max-width:1100px;margin:0 auto;padding:16px}
-  h1{margin:8px 0;font-size:clamp(20px,3vw,28px)}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.06);margin:12px 0}
-  .card h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
-  .card section{padding:12px 16px}
-  .btn{border:none;border-radius:10px;padding:10px 14px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
-  .btn.secondary{background:#fff;color:var(--brand);border:1px solid var(--brand)}
-  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);box-sizing:border-box}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .grid{display:grid;gap:12px}.g2{grid-template-columns:1fr}@media(min-width:900px){.g2{grid-template-columns:1fr 1fr}}
-  .muted{color:#64748b;font-size:12px}
-  canvas{border:1px solid var(--line);border-radius:10px;background:#fff;width:100%;max-width:560px;height:auto}
-  .hidden{display:none!important}
-  @media print{.no-print{display:none!important}.wrap{max-width:100%;padding:0}.card{border:none;box-shadow:none}}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  h1{margin:6px 0 12px;font-size:clamp(20px,3vw,28px)}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 20px rgba(2,6,23,.05)}
+  .panel h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
+  .panel .body{padding:12px 16px}
+  .controls .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+  .chip{border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:10px;cursor:pointer}
+  .chip.active{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;cursor:pointer}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .muted{color:var(--muted);font-size:12px}
+  .grid{display:grid;gap:12px}
+  @media(min-width:1000px){.g2{grid-template-columns: 360px 1fr}}
+  canvas{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:12px}
+  .legend{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:8px}
+  .legend .k{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}
+  .k b{display:block;margin-bottom:4px}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="row" style="justify-content:space-between">
-    <h1>Mini4WD Advisor <span class="muted">— BETA v3.1</span></h1>
-    <button id="logout" class="btn secondary hidden no-print">Logout</button>
+    <h1>Mini4WD Advisor — Demo Grafica (Tecnica)</h1>
+    <div class="muted">Bozza interattiva: vista Sopra/Sotto, rotazione, griglia mm, componenti base</div>
   </div>
 
-  <!-- LOGIN -->
-  <div id="boxLogin" class="card">
-    <h2>Accesso</h2>
-    <section class="grid g2">
-      <div><label>Username</label><input id="u" autocomplete="username" placeholder="es. racer01"></div>
-      <div><label>Password</label><input id="p" type="password" autocomplete="current-password" placeholder="Password"></div>
-    </section>
-    <section class="row no-print" style="padding:0 16px 16px">
-      <button id="login" class="btn">Entra</button>
-      <button id="reg" class="btn secondary">Registrati</button>
-      <button id="guest" class="btn secondary">Entra come ospite</button>
-      <div class="muted">BETA: credenziali salvate localmente sul dispositivo (no server).</div>
-    </section>
-  </div>
+  <div class="grid g2">
+    <!-- Pannello controlli -->
+    <div class="panel">
+      <h2>Controlli</h2>
+      <div class="body controls">
+        <div class="group">
+          <span class="muted">Vista:</span>
+          <button class="chip active" data-view="top">Sopra</button>
+          <button class="chip" data-view="bottom">Sotto</button>
+        </div>
 
-  <!-- APP -->
-  <div id="boxApp" class="card hidden">
-    <h2>Analisi pista + Setup</h2>
-    <section class="grid g2">
-      <div>
-        <label>Foto pista (puoi selezionarne più di una)</label>
-        <input id="files" type="file" accept="image/*" multiple class="no-print">
-        <div class="row no-print" style="margin-top:8px">
-          <button id="analyze" class="btn">Analizza</button>
-          <button id="demo" class="btn secondary">Demo</button>
+        <div class="group">
+          <span class="muted">Rotazione:</span>
+          <input id="rot" type="range" min="0" max="360" value="0">
+          <span id="rotLabel" class="muted">0°</span>
         </div>
-        <div id="metrics" class="muted" style="margin-top:8px;display:none">
-          Salti: <b id="mJ">-</b> • Curve: <b id="mC">-</b> • Rett.: <b id="mS">-</b> • Paraboliche: <b id="mB">-</b> • Sottopassi: <b id="mU">-</b>
+
+        <div class="group">
+          <span class="muted">Scala disegno:</span>
+          <input id="scale" type="range" min="0.7" max="1.3" step="0.05" value="1">
+          <span id="scaleLabel" class="muted">100%</span>
         </div>
-        <div class="row no-print" style="margin-top:10px">
-          <button id="opt" class="btn">Calcola Top-3</button>
-          <button id="print" class="btn secondary">Esporta PDF</button>
+
+        <div class="group">
+          <span class="muted">Livelli:</span>
+          <label><input type="checkbox" class="layer" data-layer="grid" checked> Griglia mm</label>
+          <label><input type="checkbox" class="layer" data-layer="plates" checked> Piastre</label>
+          <label><input type="checkbox" class="layer" data-layer="rollers" checked> Roller</label>
+          <label><input type="checkbox" class="layer" data-layer="dampers" checked> Damper</label>
+          <label><input type="checkbox" class="layer" data-layer="brakes" checked> Freni</label>
+          <label><input type="checkbox" class="layer" data-layer="weights" checked> Pesi</label>
+          <label><input type="checkbox" class="layer" data-layer="labels" checked> Etichette</label>
+        </div>
+
+        <div class="group">
+          <button id="reset" class="btn">Reset vista</button>
+          <button id="export" class="btn primary">Esporta PNG</button>
+        </div>
+
+        <div class="group">
+          <div class="muted">Dimensioni riferimento (Super‑II):</div>
+          <ul class="muted" style="margin:4px 0 0 16px;line-height:1.6">
+            <li>Lunghezza telaio ~156 mm</li>
+            <li>Passo ruote ~80 mm</li>
+            <li>Larghezza base ~90 mm</li>
+          </ul>
         </div>
       </div>
-      <div>
-        <div class="row no-print" style="gap:8px;margin-bottom:8px">
-          <button id="topv" class="btn secondary">Vista Sopra</button>
-          <button id="botv" class="btn secondary">Vista Sotto</button>
-          <label class="muted">Rotazione: <span id="degLabel">0°</span></label>
-          <input id="deg" type="range" min="0" max="360" value="0" style="width:160px">
-        </div>
-        <canvas id="cv" width="560" height="320"></canvas>
-      </div>
-    </section>
+    </div>
 
-    <section>
-      <h2>Top-3 Setup consigliati (Super-II)</h2>
-      <div id="results"></div>
-    </section>
+    <!-- Canvas -->
+    <div class="panel">
+      <h2>Schema tecnico (bozza)</h2>
+      <div class="body">
+        <canvas id="cv" width="1100" height="520" aria-label="Schema Mini4WD"></canvas>
+        <div class="muted" style="margin-top:8px">⚠️ Bozza: proporzioni vicine al reale, non definitive. Servono i dati ufficiali del catalogo per la calibrazione fine in mm.</div>
+      </div>
+    </div>
   </div>
 
-  <div class="muted" style="text-align:center;margin:8px 0">BETA v3.1 — Solo componenti Tamiya — Offline client-side</div>
+  <!-- Legenda -->
+  <div class="panel" style="margin-top:12px">
+    <h2>Legenda</h2>
+    <div class="body legend">
+      <div class="k"><b>Chassis</b> profilo scocca e ruote</div>
+      <div class="k"><b>Piastre</b> front/rear FRP/Carbonio (azzurro tenue)</div>
+      <div class="k"><b>Roller</b> 13/19 mm (blu acceso)</div>
+      <div class="k"><b>Damper</b> masse 8/12 g (giallo)</div>
+      <div class="k"><b>Freni</b> sponge/basette (rosso)</div>
+      <div class="k"><b>Pesi</b> piombi/ottone (verde)</div>
+    </div>
+  </div>
 </div>
 
 <script>
-const $=s=>document.querySelector(s); const LS="mini4wd_users_v31";
-function canLS(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}}
-async function sha(s){const b=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}
-function load(){return canLS()?JSON.parse(localStorage.getItem(LS)||"{}"):window._mem||{}}
-function save(m){if(canLS())localStorage.setItem(LS,JSON.stringify(m)); else window._mem=m;}
-async function register(u,p){const m=load(); if(m[u]) throw Error("Username già registrato"); m[u]=await sha(p); save(m);}
-async function login(u,p){const m=load(); if(!m[u]) throw Error("Utente non trovato"); if(m[u]!==await sha(p)) throw Error("Password errata");}
-function enter(){ $("#boxLogin").classList.add("hidden"); $("#boxApp").classList.remove("hidden"); $("#logout").classList.remove("hidden"); draw();}
-function logout(){ $("#boxApp").classList.add("hidden"); $("#boxLogin").classList.remove("hidden"); $("#logout").classList.add("hidden");}
-$("#reg").onclick=async()=>{const u=$("#u").value.trim(),p=$("#p").value;if(!u||!p)return alert("Inserisci username e password"); try{await register(u,p); alert("Registrazione ok! Ora fai login.");}catch(e){alert(e.message)}};
-$("#login").onclick=async()=>{const u=$("#u").value.trim(),p=$("#p").value;if(!u||!p)return alert("Inserisci username e password"); try{await login(u,p); enter();}catch(e){alert(e.message)}};
-$("#guest").onclick=()=>enter();
-$("#logout").onclick=logout;
+/* ====== Parametri base (Super‑II) ====== */
+const BASE = {
+  length: 156,   // mm
+  width: 90,     // mm scocca (senza roller)
+  wheelbase: 80, // mm
+  // scala canvas: quanti px per mm (adattata dinamicamente)
+};
+const COLORS = {
+  ink:"#0f172a", line:"#e2e8f0", muted:"#94a3b8",
+  plate:"#76a6ff", roller:"#1e90ff", damper:"#f59e0b",
+  brake:"#ef4444", weight:"#10b981", chassis:"#334155", rubber:"#111827"
+};
 
-const cv=document.getElementById("cv"), cx=cv.getContext("2d"); let deg=0, view="top";
-function draw(){
-  cx.save(); cx.clearRect(0,0,cv.width,cv.height);
-  cx.translate(cv.width/2,cv.height/2); cx.rotate(deg*Math.PI/180); cx.translate(-cv.width/2,-cv.height/2);
-  const x0=60,y0=80,w=440,h=100;
-  cx.strokeStyle="#0f172a"; cx.lineWidth=2; cx.strokeRect(x0,y0,w,h);
-  cx.fillStyle="#e2e8f0";
-  cx.fillRect(x0+8,y0+10,34,10); cx.fillRect(x0+w-42,y0+10,34,10);
-  cx.fillRect(x0+8,y0+h-22,34,10); cx.fillRect(x0+w-42,y0+h-22,34,10);
-  cx.fillStyle="#64748b"; cx.fillText("Vista "+(view==="top"?"Sopra":"Sotto"), 16, 22);
-  cx.fillStyle="#0ea5e9"; cx.beginPath(); cx.arc(x0+20,y0+6,6,0,Math.PI*2); cx.fill();
-  cx.beginPath(); cx.arc(x0+w-20,y0+6,6,0,Math.PI*2); cx.fill();
+const cv = document.getElementById('cv');
+const cx = cv.getContext('2d');
+let state = {
+  view: 'top',
+  rot: 0,
+  scale: 1,
+  layers: {grid:true, plates:true, rollers:true, dampers:true, brakes:true, weights:true, labels:true}
+};
+
+// coordinate helper (centro canvas)
+function center(){ return {cx: cv.width/2, cy: cv.height/2}; }
+function mm2px(mm){ // scala: 1 mm = k px
+  // scalatura dinamica per far entrare ~180 mm (lunghezza + margine) nel canvas
+  const usable = cv.width*0.8;
+  const k = (usable / 180) * state.scale;
+  return mm * k;
+}
+function drawGrid(){
+  const {cx:CX, cy:CY} = center();
+  const k = mm2px(1);
+  const extent = {x: cv.width*0.45, y: cv.height*0.40};
+  cx.save();
+  cx.translate(CX, CY);
+  cx.rotate(state.rot*Math.PI/180);
+  cx.strokeStyle = COLORS.line;
+  cx.lineWidth = 1;
+  // griglia ogni 10 mm
+  for(let i=-200;i<=200;i+=10){
+    cx.beginPath(); cx.moveTo(-extent.x, i*k); cx.lineTo(extent.x, i*k); cx.stroke();
+    cx.beginPath(); cx.moveTo(i*k, -extent.y); cx.lineTo(i*k, extent.y); cx.stroke();
+  }
+  // assi
+  cx.strokeStyle = COLORS.muted;
+  cx.lineWidth = 1.5;
+  cx.beginPath(); cx.moveTo(-extent.x,0); cx.lineTo(extent.x,0); cx.stroke();
+  cx.beginPath(); cx.moveTo(0,-extent.y); cx.lineTo(0,extent.y); cx.stroke();
+  // tacche mm vicino al bordo
+  cx.fillStyle = COLORS.muted;
+  cx.font = '12px system-ui';
+  for(let i=-150;i<=150;i+=30){
+    cx.fillText(`${i} mm`, i*k-16, -extent.y-6);
+  }
   cx.restore();
 }
-$("#deg").oninput=e=>{deg=+e.target.value; $("#degLabel").textContent=deg+"°"; draw()}
-$("#topv").onclick=()=>{view="top"; draw()}; $("#botv").onclick=()=>{view="bottom"; draw()}
-draw();
 
-function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-function analyzeBitmap(img){
-  const c=document.createElement("canvas"); c.width=240; c.height=Math.round(240*img.height/img.width);
-  const g=c.getContext("2d"); g.drawImage(img,0,0,c.width,c.height);
-  const d=g.getImageData(0,0,c.width,c.height).data; let edges=0,varc=0,br=0,count=0;
-  for(let y=1;y<c.height-1;y++){ for(let x=1;x<c.width-1;x++){
-    const i=(y*c.width+x)*4, gray=(d[i]+d[i+1]+d[i+2])/3;
-    const l=(d[i-4]+d[i-3]+d[i-2])/3, r=(d[i+4]+d[i+5]+d[i+6])/3;
-    const u=(d[i-4*c.width]+d[i-4*c.width+1]+d[i-4*c.width+2])/3, dd=(d[i+4*c.width]+d[i+4*c.width+1]+d[i+4*c.width+2])/3;
-    const mag=Math.min(255, Math.hypot(r-l, dd-u));
-    edges+=mag/255; varc+=gray*gray; br+=gray; count++;
-  }}
-  const mean=br/count; const variance=Math.max(0,(varc/count)-(mean*mean))/(255*255/4);
-  const E=clamp(edges/count*4,0,1), V=clamp(variance,0,1), B=clamp(mean/255,0,1);
-  const curves=clamp(0.2+E*0.6,0,1), jumps=clamp(0.2+V*0.5,0,1), straights=clamp(0.2+(1-E)*0.6,0,1);
-  const banks=clamp(0.1+E*0.3,0,1), under=clamp(0.05+(0.6-B)*0.6,0,1);
-  return {jumps,curves,straights,banks,underpasses:under};
+function roundedRect(x,y,w,h,r){
+  cx.beginPath();
+  cx.moveTo(x+r,y);
+  cx.arcTo(x+w,y,x+w,y+h,r);
+  cx.arcTo(x+w,y+h,x,y+h,r);
+  cx.arcTo(x,y+h,x,y,r);
+  cx.arcTo(x,y,x+w,y,r);
+  cx.closePath();
 }
-async function analyzeFiles(files){
-  if(!files||!files.length){ return {jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12}; }
-  let acc={j:0,c:0,s:0,b:0,u:0}, n=0;
-  for(const f of files){
-    const img=await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(f)});
-    const r=analyzeBitmap(img); acc.j+=r.jumps; acc.c+=r.curves; acc.s+=r.straights; acc.b+=r.banks; acc.u+=r.underpasses; n++;
+function drawChassis(){
+  const {cx:CX, cy:CY} = center();
+  const L = mm2px(BASE.length);
+  const W = mm2px(BASE.width);
+  const WB = mm2px(BASE.wheelbase);
+
+  const bodyW = W;              // larghezza scocca
+  const bodyL = L * 0.78;       // lunghezza visiva scocca
+  const noseL = L * 0.11;       // “muso” anteriore
+  const tailL = L * 0.11;       // coda posteriore
+  const wheelDia = mm2px(26);   // ruote 26 mm
+  const wheelW = mm2px(10);     // spessore ruota
+  const axOffset = WB/2;
+
+  cx.save();
+  cx.translate(CX, CY);
+  cx.rotate(state.rot*Math.PI/180);
+
+  // RUOTE
+  cx.fillStyle = COLORS.rubber;
+  // asse anteriore
+  cx.beginPath(); cx.ellipse(-axOffset, -bodyW/2 - wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse(-axOffset,  bodyW/2 + wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
+  // asse posteriore
+  cx.beginPath(); cx.ellipse( axOffset, -bodyW/2 - wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
+  cx.beginPath(); cx.ellipse( axOffset,  bodyW/2 + wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
+
+  // SCOCCA
+  cx.fillStyle = '#fff';
+  cx.strokeStyle = COLORS.chassis;
+  cx.lineWidth = 2;
+  const bodyX = -bodyL/2, bodyY = -bodyW/2;
+  roundedRect(bodyX, bodyY, bodyL, bodyW, mm2px(6)); cx.fill(); cx.stroke();
+
+  // muso e coda
+  cx.beginPath(); cx.moveTo(bodyX, bodyY); cx.lineTo(bodyX - noseL, 0); cx.lineTo(bodyX, bodyY + bodyW); cx.closePath(); cx.fill(); cx.stroke();
+  cx.beginPath(); cx.moveTo(bodyX + bodyL, bodyY); cx.lineTo(bodyX + bodyL + tailL, 0); cx.lineTo(bodyX + bodyL, bodyY + bodyW); cx.closePath(); cx.fill(); cx.stroke();
+
+  // etichetta
+  if(state.layers.labels){
+    cx.fillStyle = COLORS.muted;
+    cx.font = '12px system-ui';
+    cx.fillText(`Vista ${state.view === 'top' ? 'Sopra' : 'Sotto'}`, -bodyL/2, -bodyW/2 - mm2px(12));
   }
-  return {jumps:acc.j/n,curves:acc.c/n,straights:acc.s/n,banks:acc.b/n,underpasses:acc.u/n};
+
+  cx.restore();
 }
-document.getElementById("analyze").onclick=async()=>{ const f=document.getElementById("files").files; const r=await analyzeFiles(f);
-  document.getElementById("metrics").style.display="block";
-  mJ.textContent=r.jumps.toFixed(2); mC.textContent=r.curves.toFixed(2); mS.textContent=r.straights.toFixed(2); mB.textContent=r.banks.toFixed(2); mU.textContent=r.underpasses.toFixed(2);
-  window._track=r;
-};
-document.getElementById("demo").onclick=()=>{ document.getElementById("metrics").style.display="block";
-  mJ.textContent="0.50"; mC.textContent="0.40"; mS.textContent="0.60"; mB.textContent="0.25"; mU.textContent="0.12";
-  window._track={jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12};
+
+function drawPlatesRollersDampersBrakesWeights(){
+  const {cx:CX, cy:CY} = center();
+  const L = mm2px(BASE.length);
+  const W = mm2px(BASE.width);
+  const WB = mm2px(BASE.wheelbase);
+  const bodyL = L * 0.78;
+  const bodyX = -bodyL/2, bodyY = -W/2;
+  const axOffset = WB/2;
+
+  cx.save();
+  cx.translate(CX, CY);
+  cx.rotate(state.rot*Math.PI/180);
+
+  // PIATRE (FRP) — front/rear
+  if(state.layers.plates){
+    cx.fillStyle = COLORS.plate;
+    const plateW = mm2px(14), plateL = mm2px(60);
+    // front
+    roundedRect(bodyX - mm2px(8) - plateL, -plateW/2, plateL, plateW, mm2px(3)); cx.globalAlpha=0.25; cx.fill(); cx.globalAlpha=1; 
+    // rear
+    roundedRect(bodyX + bodyL + mm2px(8), -plateW/2, plateL, plateW, mm2px(3)); cx.globalAlpha=0.25; cx.fill(); cx.globalAlpha=1;
+  }
+
+  // ROLLER 13/19mm
+  if(state.layers.rollers){
+    const r13 = mm2px(13/2), r19 = mm2px(19/2);
+    cx.fillStyle = COLORS.roller;
+    // anteriori: estremità piastra front
+    cx.beginPath(); cx.arc(bodyX - mm2px(8) - mm2px(60) + mm2px(6), -W*0.36, r19, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(bodyX - mm2px(8) - mm2px(60) + mm2px(6),  W*0.36, r19, 0, Math.PI*2); cx.fill();
+    // posteriori: estremità piastra rear
+    cx.beginPath(); cx.arc(bodyX + bodyL + mm2px(8) + mm2px(60) - mm2px(6), -W*0.36, r13, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(bodyX + bodyL + mm2px(8) + mm2px(60) - mm2px(6),  W*0.36, r13, 0, Math.PI*2); cx.fill();
+  }
+
+  // DAMPER (8g/12g) — più vicini al posteriore
+  if(state.layers.dampers){
+    cx.fillStyle = COLORS.damper;
+    const dR = mm2px(6);
+    cx.beginPath(); cx.arc(bodyX + bodyL*0.60, -W*0.15, dR, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(bodyX + bodyL*0.60,  W*0.15, dR, 0, Math.PI*2); cx.fill();
+  }
+
+  // FRENI (sotto) — rappresentati come barre in coda
+  if(state.layers.brakes && state.view === 'bottom'){
+    cx.fillStyle = COLORS.brake;
+    cx.fillRect(bodyX + bodyL + mm2px(6), -mm2px(8), mm2px(30), mm2px(3));
+    cx.fillRect(bodyX + bodyL + mm2px(6),  mm2px(5), mm2px(30), mm2px(3));
+  }
+
+  // PESI — distribuzione CG
+  if(state.layers.weights){
+    cx.fillStyle = COLORS.weight;
+    cx.fillRect(bodyX + bodyL*0.25, -mm2px(6), mm2px(12), mm2px(4));
+    cx.fillRect(bodyX + bodyL*0.35, -mm2px(6), mm2px(12), mm2px(4));
+    cx.fillRect(bodyX + bodyL*0.45,  mm2px(2),  mm2px(12), mm2px(4));
+  }
+
+  // ETICHETTE
+  if(state.layers.labels){
+    cx.fillStyle = COLORS.muted; cx.font='12px system-ui';
+    cx.fillText('Piastra front', bodyX - mm2px(75), -mm2px(14));
+    cx.fillText('Piastra rear',  bodyX + bodyL + mm2px(10), -mm2px(14));
+    cx.fillText('Roller 19mm',  bodyX - mm2px(58), -W*0.36 - mm2px(10));
+    cx.fillText('Roller 13mm',  bodyX + bodyL + mm2px(36), -W*0.36 - mm2px(10));
+    if(state.view==='bottom'){ cx.fillText('Freni (sotto)', bodyX + bodyL + mm2px(8), -mm2px(14)); }
+    cx.fillText('Damper 8/12g', bodyX + bodyL*0.60 + mm2px(8), -W*0.15);
+    cx.fillText('Pesi (CG)',    bodyX + bodyL*0.33, mm2px(18));
+  }
+
+  cx.restore();
+}
+
+function render(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  if(state.layers.grid) drawGrid();
+  drawChassis();
+  drawPlatesRollersDampersBrakesWeights();
+}
+
+// === UI Binds ===
+document.querySelectorAll('.chip[data-view]').forEach(b=>{
+  b.onclick = ()=>{ document.querySelectorAll('.chip[data-view]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); state.view = b.dataset.view; render();
+  };
+});
+document.getElementById('rot').oninput = e => { state.rot = +e.target.value; document.getElementById('rotLabel').textContent = state.rot+'°'; render(); };
+document.getElementById('scale').oninput = e => { state.scale = +e.target.value; document.getElementById('scaleLabel').textContent = Math.round(state.scale*100)+'%'; render(); };
+document.querySelectorAll('.layer').forEach(ch=>{
+  ch.onchange = ()=>{ state.layers[ch.dataset.layer] = ch.checked; render(); };
+});
+document.getElementById('reset').onclick = ()=>{ state.rot=0; state.scale=1; document.getElementById('rot').value=0; document.getElementById('rotLabel').textContent='0°'; document.getElementById('scale').value=1; document.getElementById('scaleLabel').textContent='100%'; render(); };
+document.getElementById('export').onclick = ()=>{
+  const a=document.createElement('a'); a.download='mini4wd_demo_tecnica.png'; a.href=cv.toDataURL('image/png'); a.click();
 };
 
-const SUPER2={baseWeight:102};
-function candidates(){ return [
-  {name:"All-Round", motor:"Rev-Tuned 2 (15477)", tires:"Slick 26mm", fr:"19mm Alu", rr:"19mm Alu", damF:"8g", damR:"12g"},
-  {name:"Curvy-Grip", motor:"Torque-Tuned 2 (15478)", tires:"Spugna", fr:"13mm", rr:"13mm", damF:"8g", damR:"8g"},
-  {name:"High-Speed", motor:"Atomic Tuned 2 (15480)", tires:"Low-Friction", fr:"19mm", rr:"13mm", damF:"12g", damR:"12g"},
-];}
-function score(s,t){ let w=0; w+=(s.fr==="19mm Alu"?0.6*t.straights:0.6*t.curves); w+=(s.tires.includes("Spugna")?1.2*t.curves:1.0*t.straights); if(s.motor.includes("Rev")) w+=1.1*t.straights; w+=0.02*(s.damR==="12g"?12:8)*(t.jumps+t.underpasses); return w; }
-function mass(s){ const W={ "19mm Alu":3.2,"13mm":1.1,"8g":8,"12g":12,"Slick 26mm":3.0,"Low-Friction":2.5,"Spugna":2.8,"Rev-Tuned 2 (15477)":17,"Torque-Tuned 2 (15478)":17,"Atomic Tuned 2 (15480)":17 }; const tot=SUPER2.baseWeight+(W[s.fr]||0)+(W[s.rr]||0)+(W[s.damF]||0)+(W[s.damR]||0)+(W[s.tires]||0)+(W[s.motor]||0); return Math.round(tot); }
-function renderTop(list){ const box=$("#results"); box.innerHTML=""; list.forEach((it,i)=>{ const div=document.createElement("div"); div.className="card"; div.innerHTML=`<section><b>TOP ${i+1} — ${it.name}</b><div class="muted">Peso stimato: ${mass(it)} g</div><ul style="margin:8px 0 0 18px"><li>Motore: ${it.motor}</li><li>Roller: Front ${it.fr} • Rear ${it.rr}</li><li>Damper: Front ${it.damF} • Rear ${it.damR}</li><li>Gomme: ${it.tires}</li></ul></section>`; box.appendChild(div); }); }
-document.getElementById("opt").onclick=()=>{ const t=window._track||{jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12}; const cand=candidates(); cand.sort((a,b)=>score(b,t)-score(a,t)); renderTop(cand.slice(0,3)); };
-document.getElementById("print").onclick=()=>{ if(!document.getElementById("results").innerText.trim()) return alert("Calcola prima la Top-3."); window.print(); };
+// prima render
+render();
 </script>
 </body>
 </html>
