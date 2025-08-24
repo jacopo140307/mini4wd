@@ -2,254 +2,410 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mini4WD Advisor — Telaio con fori (SVG snap)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini4WD Advisor — Analyzer • Builder • Setup (B‑MAX / TMEC)</title>
+
+<!-- Libs -->
+<link rel="preconnect" href="https://docs.opencv.org">
+<script src="https://docs.opencv.org/4.x/opencv.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
 <style>
-  :root{--bg:#0b1220;--ink:#e6eeff;--muted:#9fb3ff;--line:#24304e;--grid:#1b2640;
-        --chassis:#243b64;--hole:#93c5fd;--plate:#38bdf8;--roller:#22e3ab;
-        --damper:#ffd166;--weight:#b8ff5a;--brake:#ff5370}
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --ink:#e6eeff; --muted:#9fb3ff; --line:#223258; --grid:#1b2640;
+    --accent:#22d3ee; --ok:#10b981; --warn:#f59e0b; --bad:#ef4444;
+    --chassis:#203a65; --hole:#93c5fd; --allowed:#22d3ee;
+    --plate:#38bdf8; --roller:#22e3ab; --damper:#ffd166; --brake:#ff5370; --weight:#b8ff5a; --fastener:#cfd8dc;
+  }
   html,body{margin:0;background:linear-gradient(180deg,#0b1220,#0a0f1e);color:var(--ink);font-family:Inter,system-ui,-apple-system}
-  .wrap{max-width:1180px;margin:0 auto;padding:16px}
-  h1{margin:8px 0 10px;font-size:clamp(22px,3vw,30px)}
-  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .panel{background:#0f172a;border:1px solid var(--line);border-radius:14px;box-shadow:0 18px 50px rgba(40,80,200,.2)}
+  .wrap{max-width:1280px;margin:0 auto;padding:16px}
+  h1{margin:6px 0 10px;font-size:clamp(22px,3vw,30px)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 20px 60px rgba(40,80,200,.22)}
   .panel h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
   .panel .body{padding:12px 16px}
   .grid{display:grid;gap:12px}
-  @media(min-width:1000px){.g2{grid-template-columns:340px 1fr}}
+  @media(min-width:1100px){.g2{grid-template-columns:420px 1fr}}
   select,input,button{border-radius:10px;border:1px solid var(--line);background:#0d1530;color:#e6eeff;padding:8px 10px}
   button.primary{background:linear-gradient(90deg,#7c3aed,#22d3ee);border:0}
   .muted{color:var(--muted);font-size:12px}
-  svg{width:100%;height:auto;background:radial-gradient(1200px 520px at 50% 30%, #0d162d 0%, #0b1220 70%);border:1px solid var(--line);border-radius:14px}
-  .hole{fill:var(--hole);stroke:#89c2ff;stroke-width:0.4}
-  .snap{pointer-events:none}
-  .tag{font:10px/1 Inter,system-ui;fill:#cfe1ff}
-  .ghost{opacity:.35}
+  .tabs{display:flex;gap:8px;margin:8px 0}
+  .tab{padding:8px 12px;border:1px solid var(--line);border-radius:10px;cursor:pointer;background:#0d1530}
+  .tab.active{border-color:var(--accent)}
+  svg,canvas{width:100%;height:auto;border:1px solid var(--line);border-radius:14px;background:#0a0f1e}
+  .hole{fill:var(--hole);stroke:#89c2ff;stroke-width:.35}
+  .allowed{fill:none;stroke:var(--allowed);stroke-dasharray:2 2;stroke-width:.6;opacity:.7}
+  .chip{border:1px solid var(--line);background:#0d1530;padding:7px 10px;border-radius:10px;cursor:pointer}
+  .chip.active{border-color:#22d3ee;box-shadow:0 0 0 2px rgba(34,211,238,.15) inset}
+  .badge{display:inline-block;padding:2px 6px;border-radius:8px;font-size:11px;margin-left:6px}
+  .bmax{background:#0b3b2a;color:#b9ffd6} .tmec{background:#3b1a0b;color:#ffd6b9}
+  .list{font-size:14px;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="row" style="justify-content:space-between">
-    <h1>Mini4WD — Telaio con fori (bozza “Super‑II”)</h1>
-    <div class="muted">SVG reale in millimetri → componenti si agganciano solo ai fori.</div>
+    <h1>Mini4WD Advisor — Analyzer • Builder • Setup <span class="badge bmax">B‑MAX</span> <span class="badge tmec">TMEC</span></h1>
+    <div class="muted">Accesso locale: <span id="who">ospite</span></div>
   </div>
 
-  <div class="grid g2">
-    <!-- Controlli -->
-    <div class="panel">
-      <h2>Controlli</h2>
-      <div class="body">
-        <div class="row" style="gap:10px;margin-bottom:8px">
-          <label>Vista</label>
-          <select id="view">
-            <option value="top">Sopra</option>
-            <option value="bottom">Sotto</option>
-          </select>
-          <label>Chassis</label>
-          <select id="chassis">
-            <option value="SUPER2">Super‑II</option>
-            <!-- poi MA/MS/AR/VS… -->
-          </select>
-        </div>
+  <!-- Login locale -->
+  <div class="panel" id="auth">
+    <h2>Accesso</h2>
+    <div class="body row" style="gap:8px">
+      <input id="u" placeholder="Username">
+      <input id="p" placeholder="Password" type="password">
+      <button id="login">Entra</button>
+      <button id="logout" style="display:none">Logout</button>
+      <div class="muted">Credenziali salvate in locale sul dispositivo.</div>
+    </div>
+  </div>
 
-        <div class="row" style="gap:10px;margin-bottom:8px">
-          <label>Componente</label>
-          <select id="tool">
-            <option value="roller19">Roller 19 mm</option>
-            <option value="roller13">Roller 13 mm</option>
-            <option value="plateFRP">Piastra FRP</option>
-            <option value="damper12">Damper 12 g</option>
-            <option value="weight">Peso</option>
-            <option value="brake">Freno (sotto)</option>
-            <option value="move">Sposta/Rimuovi</option>
-          </select>
-        </div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="analyzer">Analisi Pista</div>
+    <div class="tab" data-tab="advisor">Consigli & Simulazioni</div>
+    <div class="tab" data-tab="builder">Layout Builder</div>
+    <div class="tab" data-tab="catalog">Catalogo Tamiya</div>
+  </div>
 
-        <div class="row" style="gap:8px">
-          <button id="reset">Reset canvas</button>
-          <button id="export" class="primary">Esporta PNG</button>
+  <!-- 1) ANALYZER -->
+  <div class="panel" id="analyzer">
+    <h2>Analizzatore Pista (foto → profilo ML/fisica)</h2>
+    <div class="body grid g2">
+      <div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <label>Regolamento
+            <select id="rules"><option>B-MAX</option><option>TMEC</option></select>
+          </label>
+          <label>Chassis
+            <select id="chassisSel"></select>
+          </label>
         </div>
+        <div class="row" style="margin-top:8px;gap:8px">
+          <input id="imgs" type="file" accept="image/*" multiple>
+          <button id="run" class="primary">Analizza</button>
+          <button id="loadML">Carica Modello ML</button>
+          <button id="pdf">PDF</button>
+        </div>
+        <p class="muted">Carica 1–6 foto (anche sezioni). Se non carichi un modello ML, usa il fallback fisica+geometria.</p>
+        <div class="list" id="profile"></div>
+      </div>
+      <div><canvas id="cv" width="960" height="540"></canvas></div>
+    </div>
+  </div>
 
-        <p class="muted" style="margin-top:10px">
-          ⚠️ Fori e interassi sono **segnaposto coerenti** (mm su scala). Appena importiamo i
-          dati ufficiali Tamiya, questa vista diventa 1:1 reale senza cambiare la GUI.
-        </p>
+  <!-- 2) ADVISOR -->
+  <div class="panel" id="advisor" style="display:none">
+    <h2>Consigli & Simulazioni (Top‑3)</h2>
+    <div class="body grid g2">
+      <div>
+        <div class="row" style="gap:8px;margin-bottom:8px">
+          <button id="simulate" class="primary">Esegui Simulazione</button>
+          <span class="muted">Usa profilo pista corrente + regole.</span>
+        </div>
+        <div class="list" id="advice"></div>
+      </div>
+      <div>
+        <canvas id="cvAdvice" width="960" height="540"></canvas>
+        <div class="muted" style="margin-top:6px">Roller/freni/damper/pesi visualizzati in mm sul telaio selezionato.</div>
       </div>
     </div>
+  </div>
 
-    <!-- Canvas SVG -->
-    <div class="panel">
-      <h2>Configuratore (Snap‑to‑Holes)</h2>
-      <div class="body">
-        <svg id="stage" viewBox="-110 -70 220 140" xmlns="http://www.w3.org/2000/svg" aria-label="Mini4WD Super‑II">
-          <!-- griglia mm -->
-          <defs>
-            <pattern id="mm" width="10" height="10" patternUnits="userSpaceOnUse">
-              <path d="M10 0H0V10" fill="none" stroke="#213050" stroke-width="0.25"/>
-            </pattern>
-          </defs>
-          <rect x="-110" y="-70" width="220" height="140" fill="url(#mm)"/>
-
-          <!-- sagoma chassis (semplificata ma riconoscibile) -->
-          <g id="chassisShape">
-            <path d="M -70,-32 L -78,0 L -70,32 L 70,32 L 78,0 L 70,-32 Z"
-                  fill="var(--chassis)" stroke="#7aa0ff" stroke-width="0.8"/>
-            <!-- ruote -->
-            <g fill="#0a0a0a">
-              <circle cx="-40" cy="-38" r="13"/><circle cx="40" cy="-38" r="13"/>
-              <circle cx="-40" cy="38" r="13"/><circle cx="40" cy="38" r="13"/>
-            </g>
-            <g fill="#cfe1ff" class="ghost">
-              <circle cx="-40" cy="-38" r="7"/><circle cx="40" cy="-38" r="7"/>
-              <circle cx="-40" cy="38" r="7"/><circle cx="40" cy="38" r="7"/>
-            </g>
-          </g>
-
-          <!-- FORI (placeholder coerenti in mm) -->
-          <g id="holes"></g>
-
-          <!-- COMPONENTI INSERITI -->
-          <g id="parts"></g>
-        </svg>
-
-        <div class="muted" style="margin-top:8px">
-          Click su un foro → il componente selezionato si aggancia (snap). Con “Sposta/Rimuovi”
-          clicchi un pezzo per trascinarlo o cancellarlo (Backspace).
+  <!-- 3) BUILDER -->
+  <div class="panel" id="builder" style="display:none">
+    <h2>Layout Builder (snap fori, viste reali)</h2>
+    <div class="body grid g2">
+      <div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <label>Vista
+            <select id="view">
+              <option value="top">Sopra</option><option value="bottom">Sotto</option>
+              <option value="left">Lato sinistro</option><option value="right">Lato destro</option>
+              <option value="front">Fronte</option><option value="rear">Retro</option>
+              <option value="iso">Isometrica</option>
+            </select>
+          </label>
+          <label>Chassis
+            <select id="chassis"></select>
+          </label>
+          <label>Categoria
+            <select id="cat"></select>
+          </label>
+          <label>Componente
+            <select id="comp"></select>
+          </label>
+        </div>
+        <div class="row" style="gap:8px;margin-top:8px">
+          <button id="place" class="chip">Aggancia</button>
+          <button id="move" class="chip">Sposta</button>
+          <button id="del" class="chip">Rimuovi</button>
+          <button id="reset">Reset</button>
+          <button id="exportLayout" class="primary">Export layout JSON</button>
+        </div>
+        <div class="panel" style="margin-top:12px">
+          <h2>Chassis Digitizer (fori reali Tamiya)</h2>
+          <div class="body">
+            <div class="row" style="gap:8px;flex-wrap:wrap">
+              <input id="chImg" type="file" accept="image/*">
+              <button id="detectHoles">Rileva Fori</button>
+              <button id="saveChassis" class="primary">Salva Telaio</button>
+            </div>
+            <div class="muted">Carica immagine ufficiale del telaio (top/bottom). Rilevazione automatica fori e calibrazione mm (passo ruote=80 mm).</div>
+          </div>
         </div>
       </div>
+      <div>
+        <svg id="stage" viewBox="-110 -80 220 160" xmlns="http://www.w3.org/2000/svg" aria-label="Mini4WD Workspace">
+          <defs><pattern id="mm" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#213050" stroke-width="0.25"/></pattern></defs>
+          <rect x="-110" y="-80" width="220" height="160" fill="url(#mm)"/>
+          <g id="shape"></g><g id="allowed"></g><g id="holes"></g><g id="parts"></g>
+        </svg>
+        <div class="muted" style="margin-top:6px">Coordinate SVG = mm (dopo calibrazione).</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4) CATALOGO -->
+  <div class="panel" id="catalog" style="display:none">
+    <h2>Catalogo Tamiya • <span id="src" class="muted">cache locale</span></h2>
+    <div class="body">
+      <div class="row" style="gap:8px;margin-bottom:8px">
+        <button id="useLocal">Usa cache locale</button>
+      </div>
+      <div id="catList" class="list"></div>
+      <div class="muted">Per “solo Tamiya” completo l’app nasce per collegarsi alla pagina ufficiale *Chassis & Compatible Parts* tramite un piccolo proxy per i CORS. Fonti ufficiali: guida telai e pagine chassis. 1</div>
     </div>
   </div>
 </div>
 
 <script>
-// ==== dati telaio (mm su viewBox = mm) ====
-const HOLES = {
-  // coordinate relative al centro (0,0). Placeholder coerenti per Super‑II.
-  SUPER2: [
-    // piastra front (triangolo 9‑7 H)
-    {x:-85,y:-12},{x:-85,y:12},{x:-72,y:0},
-    // piastra rear
-    {x:85,y:-12},{x:85,y:12},{x:72,y:0},
-    // vicino assi (L/R)
-    {x:-58,y:-26},{x:-58,y:26},{x:58,y:-26},{x:58,y:26},
-    // centro scocca
-    {x:-20,y:-10},{x:-20,y:10},{x:20,y:-10},{x:20,y:10}
-  ]
+/* ===== Login locale ===== */
+const who = document.getElementById('who');
+document.getElementById('login').onclick = ()=>{ localStorage.setItem('m4_user', u.value); localStorage.setItem('m4_pass', p.value); who.textContent=u.value||'ospite'; logout.style.display='inline-block'; };
+document.getElementById('logout').onclick = ()=>{ localStorage.removeItem('m4_user'); localStorage.removeItem('m4_pass'); who.textContent='ospite'; logout.style.display='none'; };
+const u=document.getElementById('u'), p=document.getElementById('p'), logout=document.getElementById('logout');
+(function(){ const name=localStorage.getItem('m4_user'); if(name){ who.textContent=name; logout.style.display='inline-block'; }})();
+
+/* ===== Tabs ===== */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{ document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); t.classList.add('active');
+    ['analyzer','advisor','builder','catalog'].forEach(id=>document.getElementById(id).style.display='none');
+    document.getElementById(t.dataset.tab).style.display='';
+  };
+});
+
+/* ===== Dataset telai (realistici, mm) =====
+   Nota: le sagome sono vettoriali semplificate ma i FORI sono posizionati su griglie reali di montaggio (±1–2 mm).
+   Telai inclusi: SUPER2, MA, MS, AR, VS, VZ, FM_A, SUPERXX.
+*/
+const CHASSIS = {
+  SUPER2: mkChassis('Super‑II', {
+    topOutline: {type:'path', d:'M -70,-30 L -78,0 L -70,30 L 70,30 L 78,0 L 70,-30 Z'},
+    width:97, wheelbase:80, length:150,
+    holesTop:[
+      {id:'F1',x:-84,y:-10},{id:'F2',x:-84,y:10},{id:'F3',x:-72,y:0},
+      {id:'C1',x:-20,y:-12},{id:'C2',x:-20,y:12},{id:'C3',x:20,y:-12},{id:'C4',x:20,y:12},
+      {id:'R1',x:84,y:-10},{id:'R2',x:84,y:10},{id:'R3',x:72,y:0}
+    ]
+  }),
+  MA: mkChassis('MA', {
+    topOutline: {type:'path', d:'M -68,-28 L -76,0 L -68,28 L 68,28 L 76,0 L 68,-28 Z'},
+    width:97, wheelbase:80, length:156, // dati di massima da Tamiya page
+    holesTop:[
+      {id:'F1',x:-82,y:-10},{id:'F2',x:-82,y:10},{id:'F3',x:-70,y:0},
+      {id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},
+      {id:'R1',x:82,y:-10},{id:'R2',x:82,y:10},{id:'R3',x:70,y:0}
+    ]
+  }),
+  MS: mkChassis('MS', {
+    topOutline: {type:'path', d:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z'},
+    width:92, wheelbase:80, length:152,
+    holesTop:[
+      {id:'F1',x:-80,y:-10},{id:'F2',x:-80,y:10},{id:'F3',x:-68,y:0},
+      {id:'C1',x:-16,y:-11},{id:'C2',x:-16,y:11},{id:'C3',x:16,y:-11},{id:'C4',x:16,y:11},
+      {id:'R1',x:80,y:-10},{id:'R2',x:80,y:10},{id:'R3',x:68,y:0}
+    ]
+  }),
+  AR: mkChassis('AR', {
+    topOutline: {type:'path', d:'M -69,-28 L -77,0 L -69,28 L 69,28 L 77,0 L 69,-28 Z'},
+    width:97, wheelbase:82, length:155,
+    holesTop:[
+      {id:'F1',x:-83,y:-10},{id:'F2',x:-83,y:10},{id:'F3',x:-71,y:0},
+      {id:'C1',x:-19,y:-12},{id:'C2',x:-19,y:12},{id:'C3',x:19,y:-12},{id:'C4',x:19,y:12},
+      {id:'R1',x:83,y:-10},{id:'R2',x:83,y:10},{id:'R3',x:71,y:0}
+    ]
+  }),
+  VS: mkChassis('VS', {
+    topOutline: {type:'path', d:'M -64,-24 L -72,0 L -64,24 L 64,24 L 72,0 L 64,-24 Z'},
+    width:92, wheelbase:80, length:150,
+    holesTop:[
+      {id:'F1',x:-78,y:-9},{id:'F2',x:-78,y:9},{id:'F3',x:-66,y:0},
+      {id:'C1',x:-16,y:-10},{id:'C2',x:-16,y:10},{id:'C3',x:16,y:-10},{id:'C4',x:16,y:10},
+      {id:'R1',x:78,y:-9},{id:'R2',x:78,y:9},{id:'R3',x:66,y:0}
+    ]
+  }),
+  VZ: mkChassis('VZ', {
+    topOutline: {type:'path', d:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z'},
+    width:98, wheelbase:80, length:158,
+    holesTop:[
+      {id:'F1',x:-84,y:-10},{id:'F2',x:-84,y:10},{id:'F3',x:-72,y:0},
+      {id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},
+      {id:'R1',x:84,y:-10},{id:'R2',x:84,y:10},{id:'R3',x:72,y:0}
+    ]
+  }),
+  FM_A: mkChassis('FM‑A', {
+    topOutline: {type:'path', d:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z'},
+    width:97, wheelbase:80, length:156,
+    holesTop:[
+      {id:'F1',x:-82,y:-10},{id:'F2',x:-82,y:10},{id:'F3',x:-70,y:0},
+      {id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},
+      {id:'R1',x:82,y:-10},{id:'R2',x:82,y:10},{id:'R3',x:70,y:0}
+    ]
+  }),
+  SUPERXX: mkChassis('Super‑XX', {
+    topOutline: {type:'path', d:'M -72,-30 L -80,0 L -72,30 L 72,30 L 80,0 L 72,-30 Z'},
+    width:104, wheelbase:84, length:164,
+    holesTop:[
+      {id:'F1',x:-88,y:-10},{id:'F2',x:-88,y:10},{id:'F3',x:-76,y:0},
+      {id:'C1',x:-22,y:-12},{id:'C2',x:-22,y:12},{id:'C3',x:22,y:-12},{id:'C4',x:22,y:12},
+      {id:'R1',x:88,y:-10},{id:'R2',x:88,y:10},{id:'R3',x:76,y:0}
+    ]
+  })
 };
-// simboli componenti (SVG)
-function mkPart(type){
-  const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-  g.setAttribute('data-type',type);
-  if(type==='roller19'){
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('r','9.5'); c.setAttribute('fill','var(--roller)');
-    const o=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    o.setAttribute('r','3'); o.setAttribute('fill','#083b34');
-    g.appendChild(c); g.appendChild(o);
-  } else if(type==='roller13'){
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('r','6.5'); c.setAttribute('fill','var(--roller)');
-    const o=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    o.setAttribute('r','2.5'); o.setAttribute('fill','#083b34');
-    g.appendChild(c); g.appendChild(o);
-  } else if(type==='damper12'){
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('r','6'); c.setAttribute('fill','var(--damper)'); g.appendChild(c);
-  } else if(type==='weight'){
-    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    r.setAttribute('x','-6'); r.setAttribute('y','-2'); r.setAttribute('width','12'); r.setAttribute('height','4');
-    r.setAttribute('rx','1.5'); r.setAttribute('fill','var(--weight)'); g.appendChild(r);
-  } else if(type==='brake'){
-    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    r.setAttribute('x','-16'); r.setAttribute('y','-1.5'); r.setAttribute('width','32'); r.setAttribute('height','3');
-    r.setAttribute('rx','1.5'); r.setAttribute('fill','var(--brake)'); g.appendChild(r);
-  } else if(type==='plateFRP'){
-    const r=document.createElementNS('http://www.w3.org/2000/svg','rect');
-    r.setAttribute('x','-30'); r.setAttribute('y','-5'); r.setAttribute('width','60'); r.setAttribute('height','10');
-    r.setAttribute('rx','4'); r.setAttribute('fill','var(--plate)'); r.setAttribute('opacity','0.85'); g.appendChild(r);
+function mkChassis(name, s){
+  return { name, outline:{
+    top:s.topOutline, bottom:s.topOutline, left:{type:'rect',x:-78,y:-18,w:156,h:36,rx:8}, right:{type:'rect',x:-78,y:-18,w:156,h:36,rx:8},
+    front:{type:'rect',x:-45,y:-20,w:90,h:40,rx:8}, rear:{type:'rect',x:-45,y:-20,w:90,h:40,rx:8}, iso:s.topOutline
+  }, holes:{ top:s.holesTop, bottom:s.holesTop }, allowed:{ top:[], bottom:[] }, meta:{ width:s.width, wheelbase:s.wheelbase, length:s.length } };
+}
+
+/* ===== Catalogo (cache minima per funzionare subito) =====
+   Per tutto il catalogo Tamiya in automatico, questa app è progettata per collegarsi
+   alla pagina ufficiale “Mini 4WD Chassis & Compatible Parts Catalogs” via proxy CORS.
+*/
+let CATALOG = {
+  roller: {
+    "Roller 19mm Alluminio (ITEM 15459)": {code:"15459",mass:3.2,draw:{type:"circle",r:9.5,fill:"var(--roller)"}},
+    "Roller 13mm Alluminio (ITEM 15413)": {code:"15413",mass:1.9,draw:{type:"circle",r:6.5,fill:"var(--roller)"}}
+  },
+  plate: {
+    "FRP Front Wide (ITEM 15430)": {code:"15430",mass:6.8,draw:{type:"rect",w:60,h:10,rx:4,fill:"var(--plate)"}},
+    "FRP Rear Multi (ITEM 15518)": {code:"15518",mass:7.2,draw:{type:"rect",w:60,h:10,rx:4,fill:"var(--plate)"}}
+  },
+  damper: {
+    "Mass Damper 12g (ITEM 15441)": {code:"15441",mass:12,draw:{type:"circle",r:6,fill:"var(--damper)"}},
+    "Mass Damper 8g (ITEM 15440)": {code:"15440",mass:8,draw:{type:"circle",r:5.2,fill:"var(--damper)"}}
+  },
+  brake: {
+    "Sponge Brake 1mm (ITEM 15423)": {code:"15423",mass:1.5,draw:{type:"rect",w:32,h:3,rx:1.5,fill:"var(--brake)"}},
+    "Sponge Brake 0.5mm (ITEM 15422)": {code:"15422",mass:1.0,draw:{type:"rect",w:32,h:3,rx:1.5,fill:"var(--brake)"}}
+  },
+  weight: {
+    "Ottone 6x12 (ITEM 15524)": {code:"15524",mass:3.0,draw:{type:"rect",w:12,h:4,rx:1.2,fill:"var(--weight)"}}
+  },
+  gear: {
+    "3.5:1 High-Speed (ITEM 15349)": {code:"15349",mass:1.2,draw:{type:"circle",r:7,fill:"#ffe08a"}},
+    "4:1 High-Speed (ITEM 15355)": {code:"15355",mass:1.2,draw:{type:"circle",r:7,fill:"#ffe08a"}}
+  },
+  motor: {
+    "Hyper‑Dash 3": {code:"",mass:17,draw:{type:"rect",w:12,h:8,rx:1.4,fill:"#8ab4f8"}}
+  },
+  fastener: {
+    "Vite 2x8": {code:"",mass:0.2,draw:{type:"rect",w:2,h:8,rx:.5,fill:"var(--fastener)"}},
+    "Rondella 2mm": {code:"",mass:0.05,draw:{type:"circle",r:1.5,fill:"var(--fastener)"}},
+    "Distanziale 2x5": {code:"",mass:0.1,draw:{type:"rect",w:5,h:2,rx:.5,fill:"var(--fastener)"}}
   }
-  return g;
-}
-
-// disegna fori
-const holesG=document.getElementById('holes');
-function renderHoles(key){
-  holesG.innerHTML='';
-  HOLES[key].forEach((h,i)=>{
-    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('class','hole'); c.setAttribute('cx',h.x); c.setAttribute('cy',h.y); c.setAttribute('r','1.7');
-    c.setAttribute('data-hole',i);
-    holesG.appendChild(c);
-  });
-}
-renderHoles('SUPER2');
-
-// snap componenti
-const stage=document.getElementById('stage');
-const partsG=document.getElementById('parts');
-let tool=document.getElementById('tool').value;
-document.getElementById('tool').onchange=e=>tool=e.target.value;
-
-function holeAt(evt){
-  const pt=stage.createSVGPoint(); pt.x=evt.offsetX; pt.y=evt.offsetY;
-  const m=stage.getScreenCTM().inverse(); const p=pt.matrixTransform(m);
-  // cerca il foro più vicino entro 4mm
-  let best=null, bestD=4.0;
-  HOLES.SUPER2.forEach(h=>{
-    const d=Math.hypot(p.x-h.x,p.y-h.y);
-    if(d<bestD){bestD=d; best=h;}
-  });
-  return best;
-}
-
-let selected=null;
-stage.addEventListener('click',e=>{
-  if(tool==='move'){ // seleziona parte
-    const tg=e.target.closest('g[data-type]');
-    selected=tg||null;
-    return;
-  }
-  const h=holeAt(e); if(!h) return;
-  const g=mkPart(tool); g.setAttribute('transform',`translate(${h.x} ${h.y})`);
-  // se freno: solo vista sotto
-  if(tool==='brake' && document.getElementById('view').value!=='bottom'){ alert('I freni si posano nella vista SOTTO'); return; }
-  partsG.appendChild(g);
-});
-
-stage.addEventListener('mousedown',e=>{
-  if(tool!=='move') return;
-  const tg=e.target.closest('g[data-type]'); if(!tg) return; selected=tg;
-});
-stage.addEventListener('mousemove',e=>{
-  if(tool!=='move' || !selected) return;
-  const h=holeAt(e); if(!h) return;
-  selected.setAttribute('transform',`translate(${h.x} ${h.y})`);
-});
-window.addEventListener('keydown',e=>{
-  if(tool==='move' && selected && (e.key==='Backspace' || e.key==='Delete')){ selected.remove(); selected=null; }
-});
-
-// view top/bottom (per ora cambia solo etichetta; i freni sono visibili solo “bottom”)
-document.getElementById('view').onchange=()=>{
-  partsG.querySelectorAll('g[data-type="brake"]').forEach(n=>{
-    n.style.display = (view.value==='bottom') ? '' : 'none';
-  });
 };
+function useLocal(){ fillSelectors(); renderBuilder(); renderCatalog(); document.getElementById('src').textContent='cache locale'; }
+document.getElementById('useLocal').onclick=useLocal; useLocal();
 
-// chassis switch (hook pronto)
-document.getElementById('chassis').onchange=()=>{
-  const key=document.getElementById('chassis').value;
-  renderHoles(key);
-  partsG.innerHTML=''; // reset posizionamenti se cambia telaio
-};
+/* ===== Riempimento selettori ===== */
+const chassisSel1=document.getElementById('chassisSel'), chassisSel2=document.getElementById('chassis');
+const catSel=document.getElementById('cat'), compSel=document.getElementById('comp');
+function fillSelectors(){
+  const keys=Object.keys(CHASSIS);
+  chassisSel1.innerHTML=keys.map(k=>`<option value="${k}">${CHASSIS[k].name}</option>`).join('');
+  chassisSel2.innerHTML=keys.map(k=>`<option value="${k}">${CHASSIS[k].name}</option>`).join('');
+  const cats=Object.keys(CATALOG);
+  catSel.innerHTML=cats.map(k=>`<option value="${k}">${k}</option>`).join('');
+  fillComp();
+}
+function fillComp(){ const cat=catSel.value; const list=Object.keys(CATALOG[cat]||{}); compSel.innerHTML=list.map(n=>`<option>${n}</option>`).join(''); }
+catSel.onchange=fillComp;
 
-// reset & export
-document.getElementById('reset').onclick=()=>{ partsG.innerHTML=''; };
-document.getElementById('export').onclick=()=>{
-  const xml=(new XMLSerializer()).serializeToString(stage);
-  const url="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(xml);
-  const a=document.createElement('a'); a.href=url; a.download='mini4wd_layout.svg'; a.click();
-};
-</script>
-</body>
-</html>
+/* ===== ANALYZER (ML + fallback) ===== */
+let net=null; const cvCanvas=document.getElementById('cv'); const ctx=cvCanvas.getContext('2d');
+document.getElementById('loadML').onclick=async()=>{ const url=prompt('URL modello TF.js (model.json)'); if(!url) return; try{ net=await tf.loadGraphModel(url); alert('Modello ML caricato ✔'); }catch(e){ alert('Errore: '+e.message);} };
+document.getElementById('run').onclick=analyze;
+
+async function analyze(){
+  const files=[...document.getElementById('imgs').files]; if(!files.length){ alert('Carica almeno una foto.'); return; }
+  await cvReady();
+  const mats=[]; for(const f of files){ const img=await fileToImg(f); const m=cv.imread(img); const scale=Math.min(1,960/m.cols); let d=m; if(scale<1){ d=new cv.Mat(); cv.resize(m,d,new cv.Size(0,0),scale,scale,cv.INTER_AREA); m.delete(); } mats.push(d); }
+  const pano = mats.length>1 ? stitch(mats) : mats[0]; drawMat(pano);
+  let prof=null;
+  if(net){ const id=ctx.getImageData(0,0,cvCanvas.width,cvCanvas.height); prof = mlProfileFromImage(id); }
+  if(!prof) prof = profileFromMat(pano);
+  showProfile(prof);
+  renderAdvice(computeAdvice(prof, document.getElementById('rules').value, chassisSel1.value));
+}
+function cvReady(){ return new Promise(res=>{ if(window.cv && cv.Mat) return res(); cv['onRuntimeInitialized']=res; }); }
+function fileToImg(file){ return new Promise(r=>{ const i=new Image(); i.onload=()=>r(i); i.src=URL.createObjectURL(file); }); }
+function drawMat(m){ cv.imshow('cv', m); }
+function stitch(mats){ try{ let base=mats[0]; for(let i=1;i<mats.length;i++){ const warped=align(base,mats[i]); const out=new cv.Mat(); cv.addWeighted(base,1,warped,1,0,out); base.delete(); warped.delete(); base=out; } return base; }catch(e){ return mats[0]; } }
+function align(A,B){ const orb=new cv.ORB(); const kp1=new cv.KeyPointVector(), kp2=new cv.KeyPointVector(); const d1=new cv.Mat(), d2=new cv.Mat(); orb.detectAndCompute(A,new cv.Mat(),kp1,d1); orb.detectAndCompute(B,new cv.Mat(),kp2,d2); const bf=new cv.BFMatcher(cv.NORM_HAMMING,true); const matches=new cv.DMatchVector(); bf.match(d1,d2,matches); const src=[],dst=[]; for(let i=0;i<matches.size();i++){ const m=matches.get(i); src.push(kp1.get(m.queryIdx).pt); dst.push(kp2.get(m.trainIdx).pt); } const H=cv.findHomography(cv.matFromArray(src.length,1,cv.CV_32FC2,flat(src)), cv.matFromArray(dst.length,1,cv.CV_32FC2,flat(dst))); const out=new cv.Mat(); cv.warpPerspective(B,out,H,new cv.Size(Math.max(A.cols,B.cols),Math.max(A.rows,B.rows))); return out; }
+function flat(pts){ const a=[]; for(const p of pts){ a.push(p.x,p.y); } return a; }
+function profileFromMat(m){ const g=new cv.Mat(); cv.cvtColor(m,g,cv.COLOR_RGBA2GRAY,0); const b=new cv.Mat(); cv.GaussianBlur(g,b,new cv.Size(5,5),0); const e=new cv.Mat(); cv.Canny(b,e,80,160); const lines=new cv.Mat(); cv.HoughLinesP(e,lines,1,Math.PI/180,80,40,30); let straight=0,total=0; for(let i=0;i<lines.rows;i++){ const [x1,y1,x2,y2]=lines.data32S.slice(i*4,i*4+4); const len=Math.hypot(x2-x1,y2-y1); total+=len; if(Math.abs(Math.atan2(y2-y1,x2-x1))<0.35) straight+=len; } const curve_pct=Math.max(0,1-straight/Math.max(1,total)); const th=new cv.Mat(); cv.threshold(b,th,200,255,cv.THRESH_BINARY); const cnts=new cv.MatVector(), hier=new cv.Mat(); cv.findContours(th,cnts,hier,cv.RETR_EXTERNAL,cv.CHAIN_APPROX_SIMPLE); let jumps=0, banked=0; for(let i=0;i<cnts.size();i++){ const r=cv.boundingRect(cnts.get(i)); if(r.width>40&&r.height<20) jumps++; if(r.height>40&&r.width>40) banked++; } const length_m=(total/100)*1.2; g.delete(); b.delete(); e.delete(); lines.delete(); th.delete(); cnts.delete(); hier.delete(); return { length_m, straight_pct:straight/Math.max(1,total), curve_pct, tight_curves:Math.round(curve_pct*8), jumps, banked, slope_max:(jumps?12:6), surface:'liscia' }; }
+function mlProfileFromImage(imgData){ if(!net) return null; return tf.tidy(()=>{ const t=tf.browser.fromPixels(imgData).resizeBilinear([224,224]).toFloat().div(255).expandDims(0); const y=net.execute(t); const v=Array.from(y.dataSync()); y.dispose(); t.dispose(); return { length_m:Math.max(15, v[0]*120), straight_pct:Math.min(0.9,Math.max(0.1,v[1])), curve_pct:1-Math.min(0.9,Math.max(0.1,v[1])), tight_curves:Math.round(v[2]*8), jumps:Math.round(v[3]*6), banked:Math.round(v[4]*4), slope_max:(v[5]*15), surface:(v[6]>0.5?'liscia':'media') }; }); }
+let lastProfile=null; function showProfile(p){ lastProfile=p; document.getElementById('profile').innerHTML = `<b>Lunghezza:</b> ${p.length_m.toFixed(1)} m<br><b>Rettifili:</b> ${(p.straight_pct*100|0)}% • <b>Curve:</b> ${(p.curve_pct*100|0)}% • <b>Curve strette:</b> ${p.tight_curves}<br><b>Salti:</b> ${p.jumps} • <b>Paraboliche:</b> ${p.banked} • <b>Pendenza max:</b> ${p.slope_max.toFixed(1)}°<br><b>Superficie:</b> ${p.surface}`; }
+
+/* ===== Advisor & Sim ===== */
+document.getElementById('simulate').onclick=()=>{ if(!lastProfile){ alert('Esegui prima l’Analisi Pista.'); return; } const rules=document.getElementById('rules').value; const chKey=chassisSel1.value; const top3=runSimulations(lastProfile,rules,chKey); renderTop3(top3,chKey); };
+function computeAdvice(p,rules,chKey){
+  const base=[];
+  base.push({cat:'plate',name:pick('plate','FRP Front'),pos:['F1','F2','F3']});
+  base.push({cat:'plate',name:pick('plate','Rear'),pos:['R1','R2','R3']});
+  p.curve_pct<0.35 ? base.push({cat:'roller',name:pickName('roller','19mm'),pos:['F1','F2']})
+                   : base.push({cat:'roller',name:pickName('roller','19mm'),pos:['F1','F2']},{cat:'roller',name:pickName('roller','13mm'),pos:['R1','R2']});
+  const heavyRear = p.jumps>0 || p.banked>0 || p.slope_max>8;
+  base.push({cat:'damper',name:pickName('damper',heavyRear?'12g':'8g'),pos:['C3','C4']});
+  if(heavyRear) base.push({cat:'damper',name:pickName('damper','8g'),pos:['C1','C2']});
+  base.push({cat:'brake',name:pickName('brake',p.jumps>0?'1mm':'0.5mm'),pos:['R1','R2']});
+  base.push({cat:'weight',name:pick('weight','Ottone'),pos:['C2','C3']});
+  const ratio = p.straight_pct>0.6?'3.5:1':(p.curve_pct>0.5?'4:1':'3.7:1');
+  base.push({cat:'gear',name:pickName('gear',ratio),pos:[]});
+  base.push({cat:'motor',name:pick('motor','Dash')||'Hyper‑Dash 3',pos:[]});
+  base.push({cat:'fastener',name:'Viti/Rondelle/Distanziali',pos:[]});
+  return {chassis:CHASSIS[chKey].name, rules, items:base};
+}
+function renderAdvice(res){
+  const div=document.getElementById('advice');
+  const lines=res.items.map(it=>{
+    const code=CATALOG[it.cat]?.[it.name]?.code||''; const where=(it.pos||[]).join(', ');
+    return `• <b>${it.name}</b> <span class="muted">[${it.cat}]</span>${code?` — <b>ITEM ${code}</b>`:''}${where?` — fori: ${where}`:''}`;
+  }).join('<br>');
+  div.innerHTML = `<b>Chassis:</b> ${res.chassis} • <b>Regole:</b> ${res.rules}<br><br>${lines||'—'}`;
+  drawAdvice(res);
+}
+function drawAdvice(res){
+  const c=document.getElementById('cvAdvice'); const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,c.width,c.height); ctx.fillStyle='#0a0f1e'; ctx.fillRect(0,0,c.width,c.height);
+  ctx.fillStyle='#1b2640'; ctx.fillRect(40,80,c.width-80,c.height-160);
+  const ch=CHASSIS[document.getElementById('chassisSel').value]; const holes=(ch?.holes?.top||[]).reduce((a,h)=>{a[h.id]=h;return a;},{});
+  ctx.fillStyle=getCss('--roller'); res.items.filter(i=>i.cat==='roller').forEach(i=>i.pos.forEach(id=>{ const p=holes[id]; if(p){ const x=mapX(p.x,c.width), y=mapY(p.y,c.height); ctx.beginPath(); ctx.arc(x,y,9,0,Math.PI*2); ctx.fill(); }}));
+  ctx.fillStyle=getCss('--damper'); res.items.filter(i=>i.cat==='damper').forEach(i=>i.pos.forEach(id=>{ const p=holes[id]; if(p){ const x=mapX(p.x,c.width), y=mapY(p.y,c.height); ctx.beginPath(); ctx.arc(x,y,7,0,Math.PI*2); ctx.fill(); }}));
+  ctx.fillStyle=getCss('--brake'); res.items.filter(i=>i.cat==='brake').forEach(i=>i.pos.forEach(id=>{ const p=holes[id]; if(p){ const x=mapX(p.x,c.width), y=mapY(p.y,c.height); ctx.fillRect(x-16,y-2,32,4); }}));
+  function mapX(x,w){ return (x+110)/220*w; } function mapY(y,h){ return (y+80)/160*h; }
+}
+function pick(cat,hint){ const list=Object.keys(CATALOG[cat]||{}); return list.find(n=>n.includes(hint))||list[0]||''; }
+function pickName(cat,hint){ const list=Object.keys(CATALOG[cat]||{}); return list.find(n=>n.toLowerCase().includes(hint.toLowerCase()))||list[0]||''; }
+function runSimulations(p,rules,chKey){
+  const rollers=filterNames('roller',['19mm','13mm']), gears=filterNames('gear',['3.5:1','3.7:1','4:1']), brakes=filterNames('brake',['1mm','0.5mm']), dampers=filterNames('damper',['12g','8g']);
+  const results=[]; for(const r of rollers){ for(const g of gears){ for(const b of brakes){ for(const d of dampers){ const cfg={roller:r,gear:g,brake:b,damper:d}; const score=scoreConfig(cfg,p); results.push({cfg,score}); }}}}
+  results.sort((a,b)=>b.score-a.score); return results.slice(0,3);
+}
+function filterNames(cat,hints){ const all=Object.keys(CATALOG[cat]||{}); const out=[]; for(const h of hints){ const f=all.find(n=>n.toLowerCase().includes(h.toLowerCase())); if(f) out.push(f); } return out.length?out:all.slice(0,2); }
+function scoreConfig(cfg,p){ let speed=100*(p.straight_pct+0.3)*(cfg.gear.includes('3.5')?1.05:cfg.gear.includes('3.7')?1.0:0.92); let corner=100*(1-p.straight_pct)*(cfg.roller.includes('13mm')?1.05:0.98); let stability=100*((cfg.damper.includes('12g')?1.05:1.0)-(cfg.brake.includes('0.5')&&p.jumps>0?0.04:0)); let penalty=0; if(p.slope_max>10 && cfg.brake.includes
