@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Mini4WD Advisor — BETA v3.1</title>
+<style>
+  :root{--ink:#0f172a;--muted:#64748b;--brand:#2563eb;--line:#e2e8f0;--card:#fff}
+  html,body{margin:0;background:#f7f9fc;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
+  .wrap{max-width:1100px;margin:0 auto;padding:16px}
+  h1{margin:8px 0;font-size:clamp(20px,3vw,28px)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 6px 18px rgba(2,6,23,.06);margin:12px 0}
+  .card h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
+  .card section{padding:12px 16px}
+  .btn{border:none;border-radius:10px;padding:10px 14px;background:var(--brand);color:#fff;font-weight:700;cursor:pointer}
+  .btn.secondary{background:#fff;color:var(--brand);border:1px solid var(--brand)}
+  input,select{width:100%;padding:10px;border-radius:10px;border:1px solid var(--line);box-sizing:border-box}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .grid{display:grid;gap:12px}.g2{grid-template-columns:1fr}@media(min-width:900px){.g2{grid-template-columns:1fr 1fr}}
+  .muted{color:#64748b;font-size:12px}
+  canvas{border:1px solid var(--line);border-radius:10px;background:#fff;width:100%;max-width:560px;height:auto}
+  .hidden{display:none!important}
+  @media print{.no-print{display:none!important}.wrap{max-width:100%;padding:0}.card{border:none;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="row" style="justify-content:space-between">
+    <h1>Mini4WD Advisor <span class="muted">— BETA v3.1</span></h1>
+    <button id="logout" class="btn secondary hidden no-print">Logout</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="boxLogin" class="card">
+    <h2>Accesso</h2>
+    <section class="grid g2">
+      <div><label>Username</label><input id="u" autocomplete="username" placeholder="es. racer01"></div>
+      <div><label>Password</label><input id="p" type="password" autocomplete="current-password" placeholder="Password"></div>
+    </section>
+    <section class="row no-print" style="padding:0 16px 16px">
+      <button id="login" class="btn">Entra</button>
+      <button id="reg" class="btn secondary">Registrati</button>
+      <button id="guest" class="btn secondary">Entra come ospite</button>
+      <div class="muted">BETA: credenziali salvate localmente sul dispositivo (no server).</div>
+    </section>
+  </div>
+
+  <!-- APP -->
+  <div id="boxApp" class="card hidden">
+    <h2>Analisi pista + Setup</h2>
+    <section class="grid g2">
+      <div>
+        <label>Foto pista (puoi selezionarne più di una)</label>
+        <input id="files" type="file" accept="image/*" multiple class="no-print">
+        <div class="row no-print" style="margin-top:8px">
+          <button id="analyze" class="btn">Analizza</button>
+          <button id="demo" class="btn secondary">Demo</button>
+        </div>
+        <div id="metrics" class="muted" style="margin-top:8px;display:none">
+          Salti: <b id="mJ">-</b> • Curve: <b id="mC">-</b> • Rett.: <b id="mS">-</b> • Paraboliche: <b id="mB">-</b> • Sottopassi: <b id="mU">-</b>
+        </div>
+        <div class="row no-print" style="margin-top:10px">
+          <button id="opt" class="btn">Calcola Top-3</button>
+          <button id="print" class="btn secondary">Esporta PDF</button>
+        </div>
+      </div>
+      <div>
+        <div class="row no-print" style="gap:8px;margin-bottom:8px">
+          <button id="topv" class="btn secondary">Vista Sopra</button>
+          <button id="botv" class="btn secondary">Vista Sotto</button>
+          <label class="muted">Rotazione: <span id="degLabel">0°</span></label>
+          <input id="deg" type="range" min="0" max="360" value="0" style="width:160px">
+        </div>
+        <canvas id="cv" width="560" height="320"></canvas>
+      </div>
+    </section>
+
+    <section>
+      <h2>Top-3 Setup consigliati (Super-II)</h2>
+      <div id="results"></div>
+    </section>
+  </div>
+
+  <div class="muted" style="text-align:center;margin:8px 0">BETA v3.1 — Solo componenti Tamiya — Offline client-side</div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s); const LS="mini4wd_users_v31";
+function canLS(){try{localStorage.setItem("_t","1");localStorage.removeItem("_t");return true;}catch(e){return false;}}
+async function sha(s){const b=new TextEncoder().encode(s);const h=await crypto.subtle.digest('SHA-256',b);return Array.from(new Uint8Array(h)).map(x=>x.toString(16).padStart(2,'0')).join('');}
+function load(){return canLS()?JSON.parse(localStorage.getItem(LS)||"{}"):window._mem||{}}
+function save(m){if(canLS())localStorage.setItem(LS,JSON.stringify(m)); else window._mem=m;}
+async function register(u,p){const m=load(); if(m[u]) throw Error("Username già registrato"); m[u]=await sha(p); save(m);}
+async function login(u,p){const m=load(); if(!m[u]) throw Error("Utente non trovato"); if(m[u]!==await sha(p)) throw Error("Password errata");}
+function enter(){ $("#boxLogin").classList.add("hidden"); $("#boxApp").classList.remove("hidden"); $("#logout").classList.remove("hidden"); draw();}
+function logout(){ $("#boxApp").classList.add("hidden"); $("#boxLogin").classList.remove("hidden"); $("#logout").classList.add("hidden");}
+$("#reg").onclick=async()=>{const u=$("#u").value.trim(),p=$("#p").value;if(!u||!p)return alert("Inserisci username e password"); try{await register(u,p); alert("Registrazione ok! Ora fai login.");}catch(e){alert(e.message)}};
+$("#login").onclick=async()=>{const u=$("#u").value.trim(),p=$("#p").value;if(!u||!p)return alert("Inserisci username e password"); try{await login(u,p); enter();}catch(e){alert(e.message)}};
+$("#guest").onclick=()=>enter();
+$("#logout").onclick=logout;
+
+const cv=document.getElementById("cv"), cx=cv.getContext("2d"); let deg=0, view="top";
+function draw(){
+  cx.save(); cx.clearRect(0,0,cv.width,cv.height);
+  cx.translate(cv.width/2,cv.height/2); cx.rotate(deg*Math.PI/180); cx.translate(-cv.width/2,-cv.height/2);
+  const x0=60,y0=80,w=440,h=100;
+  cx.strokeStyle="#0f172a"; cx.lineWidth=2; cx.strokeRect(x0,y0,w,h);
+  cx.fillStyle="#e2e8f0";
+  cx.fillRect(x0+8,y0+10,34,10); cx.fillRect(x0+w-42,y0+10,34,10);
+  cx.fillRect(x0+8,y0+h-22,34,10); cx.fillRect(x0+w-42,y0+h-22,34,10);
+  cx.fillStyle="#64748b"; cx.fillText("Vista "+(view==="top"?"Sopra":"Sotto"), 16, 22);
+  cx.fillStyle="#0ea5e9"; cx.beginPath(); cx.arc(x0+20,y0+6,6,0,Math.PI*2); cx.fill();
+  cx.beginPath(); cx.arc(x0+w-20,y0+6,6,0,Math.PI*2); cx.fill();
+  cx.restore();
+}
+$("#deg").oninput=e=>{deg=+e.target.value; $("#degLabel").textContent=deg+"°"; draw()}
+$("#topv").onclick=()=>{view="top"; draw()}; $("#botv").onclick=()=>{view="bottom"; draw()}
+draw();
+
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function analyzeBitmap(img){
+  const c=document.createElement("canvas"); c.width=240; c.height=Math.round(240*img.height/img.width);
+  const g=c.getContext("2d"); g.drawImage(img,0,0,c.width,c.height);
+  const d=g.getImageData(0,0,c.width,c.height).data; let edges=0,varc=0,br=0,count=0;
+  for(let y=1;y<c.height-1;y++){ for(let x=1;x<c.width-1;x++){
+    const i=(y*c.width+x)*4, gray=(d[i]+d[i+1]+d[i+2])/3;
+    const l=(d[i-4]+d[i-3]+d[i-2])/3, r=(d[i+4]+d[i+5]+d[i+6])/3;
+    const u=(d[i-4*c.width]+d[i-4*c.width+1]+d[i-4*c.width+2])/3, dd=(d[i+4*c.width]+d[i+4*c.width+1]+d[i+4*c.width+2])/3;
+    const mag=Math.min(255, Math.hypot(r-l, dd-u));
+    edges+=mag/255; varc+=gray*gray; br+=gray; count++;
+  }}
+  const mean=br/count; const variance=Math.max(0,(varc/count)-(mean*mean))/(255*255/4);
+  const E=clamp(edges/count*4,0,1), V=clamp(variance,0,1), B=clamp(mean/255,0,1);
+  const curves=clamp(0.2+E*0.6,0,1), jumps=clamp(0.2+V*0.5,0,1), straights=clamp(0.2+(1-E)*0.6,0,1);
+  const banks=clamp(0.1+E*0.3,0,1), under=clamp(0.05+(0.6-B)*0.6,0,1);
+  return {jumps,curves,straights,banks,underpasses:under};
+}
+async function analyzeFiles(files){
+  if(!files||!files.length){ return {jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12}; }
+  let acc={j:0,c:0,s:0,b:0,u:0}, n=0;
+  for(const f of files){
+    const img=await new Promise((res,rej)=>{const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=URL.createObjectURL(f)});
+    const r=analyzeBitmap(img); acc.j+=r.jumps; acc.c+=r.curves; acc.s+=r.straights; acc.b+=r.banks; acc.u+=r.underpasses; n++;
+  }
+  return {jumps:acc.j/n,curves:acc.c/n,straights:acc.s/n,banks:acc.b/n,underpasses:acc.u/n};
+}
+document.getElementById("analyze").onclick=async()=>{ const f=document.getElementById("files").files; const r=await analyzeFiles(f);
+  document.getElementById("metrics").style.display="block";
+  mJ.textContent=r.jumps.toFixed(2); mC.textContent=r.curves.toFixed(2); mS.textContent=r.straights.toFixed(2); mB.textContent=r.banks.toFixed(2); mU.textContent=r.underpasses.toFixed(2);
+  window._track=r;
+};
+document.getElementById("demo").onclick=()=>{ document.getElementById("metrics").style.display="block";
+  mJ.textContent="0.50"; mC.textContent="0.40"; mS.textContent="0.60"; mB.textContent="0.25"; mU.textContent="0.12";
+  window._track={jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12};
+};
+
+const SUPER2={baseWeight:102};
+function candidates(){ return [
+  {name:"All-Round", motor:"Rev-Tuned 2 (15477)", tires:"Slick 26mm", fr:"19mm Alu", rr:"19mm Alu", damF:"8g", damR:"12g"},
+  {name:"Curvy-Grip", motor:"Torque-Tuned 2 (15478)", tires:"Spugna", fr:"13mm", rr:"13mm", damF:"8g", damR:"8g"},
+  {name:"High-Speed", motor:"Atomic Tuned 2 (15480)", tires:"Low-Friction", fr:"19mm", rr:"13mm", damF:"12g", damR:"12g"},
+];}
+function score(s,t){ let w=0; w+=(s.fr==="19mm Alu"?0.6*t.straights:0.6*t.curves); w+=(s.tires.includes("Spugna")?1.2*t.curves:1.0*t.straights); if(s.motor.includes("Rev")) w+=1.1*t.straights; w+=0.02*(s.damR==="12g"?12:8)*(t.jumps+t.underpasses); return w; }
+function mass(s){ const W={ "19mm Alu":3.2,"13mm":1.1,"8g":8,"12g":12,"Slick 26mm":3.0,"Low-Friction":2.5,"Spugna":2.8,"Rev-Tuned 2 (15477)":17,"Torque-Tuned 2 (15478)":17,"Atomic Tuned 2 (15480)":17 }; const tot=SUPER2.baseWeight+(W[s.fr]||0)+(W[s.rr]||0)+(W[s.damF]||0)+(W[s.damR]||0)+(W[s.tires]||0)+(W[s.motor]||0); return Math.round(tot); }
+function renderTop(list){ const box=$("#results"); box.innerHTML=""; list.forEach((it,i)=>{ const div=document.createElement("div"); div.className="card"; div.innerHTML=`<section><b>TOP ${i+1} — ${it.name}</b><div class="muted">Peso stimato: ${mass(it)} g</div><ul style="margin:8px 0 0 18px"><li>Motore: ${it.motor}</li><li>Roller: Front ${it.fr} • Rear ${it.rr}</li><li>Damper: Front ${it.damF} • Rear ${it.damR}</li><li>Gomme: ${it.tires}</li></ul></section>`; box.appendChild(div); }); }
+document.getElementById("opt").onclick=()=>{ const t=window._track||{jumps:.5,curves:.4,straights:.6,banks:.25,underpasses:.12}; const cand=candidates(); cand.sort((a,b)=>score(b,t)-score(a,t)); renderTop(cand.slice(0,3)); };
+document.getElementById("print").onclick=()=>{ if(!document.getElementById("results").innerText.trim()) return alert("Calcola prima la Top-3."); window.print(); };
+</script>
+</body>
+</html>
