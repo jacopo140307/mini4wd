@@ -3,39 +3,45 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Mini4WD Advisor — Demo Grafica (Tecnica)</title>
+<title>Mini4WD Advisor — Demo Grafica (Cartoon)</title>
 <style>
-  :root{--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--accent:#2563eb;--ok:#10b981;--warn:#f59e0b;--danger:#ef4444}
-  html,body{margin:0;background:#f7f9fc;color:var(--ink);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu}
-  .wrap{max-width:1200px;margin:0 auto;padding:16px}
-  h1{margin:6px 0 12px;font-size:clamp(20px,3vw,28px)}
+  :root{
+    --bg:#0b1220; --panel:#0f172a; --ink:#e5edff; --muted:#9fb3ff;
+    --accent:#7c3aed; --accent2:#22d3ee; --line:#1e293b;
+    --chassis:#111827; --chassis-grad1:#1f2937; --chassis-grad2:#0f172a;
+    --rubber:#0a0a0a; --rim:#b6c2ff;
+    --plate:#22d3ee; --roller:#00e5a8; --damper:#ffd166; --brake:#ff5370; --weight:#b8ff5a
+  }
+  html,body{margin:0;background:linear-gradient(180deg,#0a0f1e, #0b1220 60%, #0a0f1e); color:var(--ink); font-family:Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto}
+  .wrap{max-width:1200px;margin:0 auto;padding:18px}
+  h1{margin:6px 0 14px;font-size:clamp(22px,3.2vw,30px); letter-spacing:.3px}
   .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 20px rgba(2,6,23,.05)}
-  .panel h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
-  .panel .body{padding:12px 16px}
-  .controls .group{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
-  .chip{border:1px solid var(--line);background:#fff;padding:7px 10px;border-radius:10px;cursor:pointer}
-  .chip.active{border-color:var(--accent);color:var(--accent);font-weight:700}
-  .btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:10px;cursor:pointer}
-  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .panel{background:linear-gradient(180deg,#0f172a,#0b1426); border:1px solid #1b2640; border-radius:16px; box-shadow:0 20px 60px rgba(40,80,200,.25)}
+  .panel h2{margin:0;padding:14px 16px;border-bottom:1px solid var(--line);font-size:16px;color:#cfe1ff}
+  .panel .body{padding:14px 16px}
+  .controls .group{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  .chip{border:1px solid #24304e;background:#0d1530;padding:8px 11px;border-radius:12px;cursor:pointer;color:#cfe1ff}
+  .chip.active{border-color:var(--accent2); box-shadow:0 0 0 2px rgba(34,211,238,.15) inset; color:#eaf3ff}
+  .btn{border:1px solid #24304e;background:#0d1530;padding:10px 13px;border-radius:12px;cursor:pointer;color:#dfe8ff}
+  .btn.primary{background:linear-gradient(90deg,#7c3aed,#22d3ee); color:#fff; border:0; box-shadow:0 8px 20px rgba(124,58,237,.35)}
   .muted{color:var(--muted);font-size:12px}
-  .grid{display:grid;gap:12px}
-  @media(min-width:1000px){.g2{grid-template-columns: 360px 1fr}}
-  canvas{width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:12px}
-  .legend{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:8px}
-  .legend .k{background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px;font-size:12px}
-  .k b{display:block;margin-bottom:4px}
+  .grid{display:grid;gap:14px}
+  @media(min-width:1050px){.g2{grid-template-columns: 360px 1fr}}
+  canvas{width:100%;height:auto;background:radial-gradient(1200px 520px at 50% 30%, #0d162d 0%, #0b1220 70%); border:1px solid #1b2640; border-radius:16px}
+  .legend{display:grid;grid-template-columns:repeat(6,minmax(140px,1fr));gap:10px}
+  .legend .k{background:#101a36;border:1px solid #223258;border-radius:12px;padding:10px;font-size:12px;color:#cfe1ff}
+  .k b{display:block;margin-bottom:6px;color:#fff}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="row" style="justify-content:space-between">
-    <h1>Mini4WD Advisor — Demo Grafica (Tecnica)</h1>
-    <div class="muted">Bozza interattiva: vista Sopra/Sotto, rotazione, griglia mm, componenti base</div>
+    <h1>Mini4WD Advisor — Demo Grafica <span style="color:#a78bfa">Cartoon</span></h1>
+    <div class="muted">Bozza interattiva: vista Sopra/Sotto, rotazione, livelli, stile “configuratore”</div>
   </div>
 
   <div class="grid g2">
-    <!-- Pannello controlli -->
+    <!-- Controlli -->
     <div class="panel">
       <h2>Controlli</h2>
       <div class="body controls">
@@ -52,14 +58,14 @@
         </div>
 
         <div class="group">
-          <span class="muted">Scala disegno:</span>
-          <input id="scale" type="range" min="0.7" max="1.3" step="0.05" value="1">
+          <span class="muted">Scala:</span>
+          <input id="scale" type="range" min="0.75" max="1.35" step="0.05" value="1">
           <span id="scaleLabel" class="muted">100%</span>
         </div>
 
         <div class="group">
           <span class="muted">Livelli:</span>
-          <label><input type="checkbox" class="layer" data-layer="grid" checked> Griglia mm</label>
+          <label><input type="checkbox" class="layer" data-layer="grid" checked> Griglia</label>
           <label><input type="checkbox" class="layer" data-layer="plates" checked> Piastre</label>
           <label><input type="checkbox" class="layer" data-layer="rollers" checked> Roller</label>
           <label><input type="checkbox" class="layer" data-layer="dampers" checked> Damper</label>
@@ -74,22 +80,17 @@
         </div>
 
         <div class="group">
-          <div class="muted">Dimensioni riferimento (Super‑II):</div>
-          <ul class="muted" style="margin:4px 0 0 16px;line-height:1.6">
-            <li>Lunghezza telaio ~156 mm</li>
-            <li>Passo ruote ~80 mm</li>
-            <li>Larghezza base ~90 mm</li>
-          </ul>
+          <div class="muted">Riferimenti (Super‑II): lunghezza ~156 mm • passo ~80 mm • larghezza ~90 mm</div>
         </div>
       </div>
     </div>
 
     <!-- Canvas -->
     <div class="panel">
-      <h2>Schema tecnico (bozza)</h2>
+      <h2>Configuratore (bozza)</h2>
       <div class="body">
-        <canvas id="cv" width="1100" height="520" aria-label="Schema Mini4WD"></canvas>
-        <div class="muted" style="margin-top:8px">⚠️ Bozza: proporzioni vicine al reale, non definitive. Servono i dati ufficiali del catalogo per la calibrazione fine in mm.</div>
+        <canvas id="cv" width="1200" height="560" aria-label="Schema Mini4WD"></canvas>
+        <div class="muted" style="margin-top:8px">Le posizioni sono indicative ma coerenti. Per il matching in mm useremo i dati del catalogo ufficiale.</div>
       </div>
     </div>
   </div>
@@ -98,200 +99,163 @@
   <div class="panel" style="margin-top:12px">
     <h2>Legenda</h2>
     <div class="body legend">
-      <div class="k"><b>Chassis</b> profilo scocca e ruote</div>
-      <div class="k"><b>Piastre</b> front/rear FRP/Carbonio (azzurro tenue)</div>
-      <div class="k"><b>Roller</b> 13/19 mm (blu acceso)</div>
-      <div class="k"><b>Damper</b> masse 8/12 g (giallo)</div>
-      <div class="k"><b>Freni</b> sponge/basette (rosso)</div>
-      <div class="k"><b>Pesi</b> piombi/ottone (verde)</div>
+      <div class="k"><b>Chassis</b> scocca e ruote (shading)</div>
+      <div class="k"><b>Piastre</b> FRP/Carbonio (ciano)</div>
+      <div class="k"><b>Roller</b> 13/19 mm (verde acqua)</div>
+      <div class="k"><b>Damper</b> 8/12 g (giallo)</div>
+      <div class="k"><b>Freni</b> sponge/basette (magenta)</div>
+      <div class="k"><b>Pesi</b> ottone/piombo (lime)</div>
     </div>
   </div>
 </div>
 
 <script>
-/* ====== Parametri base (Super‑II) ====== */
-const BASE = {
-  length: 156,   // mm
-  width: 90,     // mm scocca (senza roller)
-  wheelbase: 80, // mm
-  // scala canvas: quanti px per mm (adattata dinamicamente)
+/* ===== Base dimensioni (Super‑II) ===== */
+const BASE = { length:156, width:90, wheelbase:80 };
+const C = {
+  ink:getCss('--ink'), line:getCss('--line'), muted:getCss('--muted'),
+  plate:getCss('--plate'), roller:getCss('--roller'), damper:getCss('--damper'),
+  brake:getCss('--brake'), weight:getCss('--weight'),
+  chassis:getCss('--chassis'), c1:getCss('--chassis-grad1'), c2:getCss('--chassis-grad2'),
+  rubber:getCss('--rubber'), rim:getCss('--rim')
 };
-const COLORS = {
-  ink:"#0f172a", line:"#e2e8f0", muted:"#94a3b8",
-  plate:"#76a6ff", roller:"#1e90ff", damper:"#f59e0b",
-  brake:"#ef4444", weight:"#10b981", chassis:"#334155", rubber:"#111827"
-};
+function getCss(v){ return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
 
-const cv = document.getElementById('cv');
-const cx = cv.getContext('2d');
-let state = {
-  view: 'top',
-  rot: 0,
-  scale: 1,
-  layers: {grid:true, plates:true, rollers:true, dampers:true, brakes:true, weights:true, labels:true}
-};
+const cv = document.getElementById('cv'); const cx = cv.getContext('2d');
+let state = { view:'top', rot:0, scale:1, layers:{grid:true,plates:true,rollers:true,dampers:true,brakes:true,weights:true,labels:true} };
 
-// coordinate helper (centro canvas)
-function center(){ return {cx: cv.width/2, cy: cv.height/2}; }
-function mm2px(mm){ // scala: 1 mm = k px
-  // scalatura dinamica per far entrare ~180 mm (lunghezza + margine) nel canvas
-  const usable = cv.width*0.8;
-  const k = (usable / 180) * state.scale;
-  return mm * k;
+function center(){ return {cx:cv.width/2, cy:cv.height/2}; }
+function mm2px(mm){ const usable=cv.width*0.8; const k=(usable/180)*state.scale; return mm*k; }
+
+function drawGlowCircle(x,y,r,fill){
+  const g=cx.createRadialGradient(x,y, r*0.2, x,y, r);
+  g.addColorStop(0, fill); g.addColorStop(1, 'transparent');
+  cx.save(); cx.globalAlpha=0.45; cx.fillStyle=g; cx.beginPath(); cx.arc(x,y,r,0,Math.PI*2); cx.fill(); cx.restore();
 }
+
 function drawGrid(){
-  const {cx:CX, cy:CY} = center();
-  const k = mm2px(1);
-  const extent = {x: cv.width*0.45, y: cv.height*0.40};
-  cx.save();
-  cx.translate(CX, CY);
-  cx.rotate(state.rot*Math.PI/180);
-  cx.strokeStyle = COLORS.line;
-  cx.lineWidth = 1;
-  // griglia ogni 10 mm
+  const {cx:CX,cy:CY}=center(); const k=mm2px(1); const exX=cv.width*0.44, exY=cv.height*0.38;
+  cx.save(); cx.translate(CX,CY); cx.rotate(state.rot*Math.PI/180);
+  // bagliore centrale
+  drawGlowCircle(0,0,exX*0.9,'rgba(124,58,237,.25)');
+  cx.strokeStyle='rgba(34,211,238,.25)'; cx.lineWidth=1;
   for(let i=-200;i<=200;i+=10){
-    cx.beginPath(); cx.moveTo(-extent.x, i*k); cx.lineTo(extent.x, i*k); cx.stroke();
-    cx.beginPath(); cx.moveTo(i*k, -extent.y); cx.lineTo(i*k, extent.y); cx.stroke();
+    cx.beginPath(); cx.moveTo(-exX, i*k); cx.lineTo(exX, i*k); cx.stroke();
+    cx.beginPath(); cx.moveTo(i*k, -exY); cx.lineTo(i*k, exY); cx.stroke();
   }
-  // assi
-  cx.strokeStyle = COLORS.muted;
-  cx.lineWidth = 1.5;
-  cx.beginPath(); cx.moveTo(-extent.x,0); cx.lineTo(extent.x,0); cx.stroke();
-  cx.beginPath(); cx.moveTo(0,-extent.y); cx.lineTo(0,extent.y); cx.stroke();
-  // tacche mm vicino al bordo
-  cx.fillStyle = COLORS.muted;
-  cx.font = '12px system-ui';
-  for(let i=-150;i<=150;i+=30){
-    cx.fillText(`${i} mm`, i*k-16, -extent.y-6);
-  }
+  cx.strokeStyle='rgba(124,58,237,.55)'; cx.lineWidth=1.4;
+  cx.beginPath(); cx.moveTo(-exX,0); cx.lineTo(exX,0); cx.stroke();
+  cx.beginPath(); cx.moveTo(0,-exY); cx.lineTo(0,exY); cx.stroke();
   cx.restore();
 }
 
-function roundedRect(x,y,w,h,r){
-  cx.beginPath();
-  cx.moveTo(x+r,y);
-  cx.arcTo(x+w,y,x+w,y+h,r);
-  cx.arcTo(x+w,y+h,x,y+h,r);
-  cx.arcTo(x,y+h,x,y,r);
-  cx.arcTo(x,y,x+w,y,r);
-  cx.closePath();
-}
+function roundedRect(x,y,w,h,r){ cx.beginPath(); cx.moveTo(x+r,y); cx.arcTo(x+w,y,x+w,y+h,r); cx.arcTo(x+w,y+h,x,y+h,r); cx.arcTo(x,y+h,x,y,r); cx.arcTo(x,y,x+w,y,r); cx.closePath(); }
+
 function drawChassis(){
-  const {cx:CX, cy:CY} = center();
-  const L = mm2px(BASE.length);
-  const W = mm2px(BASE.width);
-  const WB = mm2px(BASE.wheelbase);
+  const {cx:CX,cy:CY}=center(); const L=mm2px(BASE.length), W=mm2px(BASE.width), WB=mm2px(BASE.wheelbase);
+  const bodyL=L*0.78, bodyW=W, noseL=L*0.11, tailL=L*0.11, wheelDia=mm2px(26), wheelW=mm2px(9.5), ax=WB/2;
+  cx.save(); cx.translate(CX,CY); cx.rotate(state.rot*Math.PI/180);
 
-  const bodyW = W;              // larghezza scocca
-  const bodyL = L * 0.78;       // lunghezza visiva scocca
-  const noseL = L * 0.11;       // “muso” anteriore
-  const tailL = L * 0.11;       // coda posteriore
-  const wheelDia = mm2px(26);   // ruote 26 mm
-  const wheelW = mm2px(10);     // spessore ruota
-  const axOffset = WB/2;
+  // ruote con cerchio
+  cx.fillStyle=C.rubber;
+  const wheels=[[-ax,-bodyW/2-wheelW/2],[ -ax, bodyW/2+wheelW/2],[ax,-bodyW/2-wheelW/2],[ax, bodyW/2+wheelW/2]];
+  wheels.forEach(([x,y])=>{
+    cx.beginPath(); cx.arc(x,y,wheelDia/2,0,Math.PI*2); cx.fill();
+    cx.fillStyle=C.rim; cx.beginPath(); cx.arc(x,y,wheelDia/2.8,0,Math.PI*2); cx.fill(); cx.fillStyle=C.rubber;
+  });
 
-  cx.save();
-  cx.translate(CX, CY);
-  cx.rotate(state.rot*Math.PI/180);
+  // scocca cartoon (gradiente + bordo brillante)
+  const x0=-bodyL/2, y0=-bodyW/2;
+  const grd=cx.createLinearGradient(x0,0,x0+bodyL,0); grd.addColorStop(0,C.c1); grd.addColorStop(1,C.c2);
+  cx.fillStyle=grd; cx.strokeStyle='rgba(124,58,237,.8)'; cx.lineWidth=2.2;
+  roundedRect(x0,y0,bodyL,bodyW, mm2px(8)); cx.fill(); cx.stroke();
 
-  // RUOTE
-  cx.fillStyle = COLORS.rubber;
-  // asse anteriore
-  cx.beginPath(); cx.ellipse(-axOffset, -bodyW/2 - wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
-  cx.beginPath(); cx.ellipse(-axOffset,  bodyW/2 + wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
-  // asse posteriore
-  cx.beginPath(); cx.ellipse( axOffset, -bodyW/2 - wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
-  cx.beginPath(); cx.ellipse( axOffset,  bodyW/2 + wheelW/2, wheelDia/2, wheelDia/2, 0, 0, Math.PI*2); cx.fill();
+  // muso / coda
+  cx.beginPath(); cx.moveTo(x0, y0); cx.lineTo(x0 - noseL, 0); cx.lineTo(x0, y0 + bodyW); cx.closePath(); cx.fill(); cx.stroke();
+  cx.beginPath(); cx.moveTo(x0 + bodyL, y0); cx.lineTo(x0 + bodyL + tailL, 0); cx.lineTo(x0 + bodyL, y0 + bodyW); cx.closePath(); cx.fill(); cx.stroke();
 
-  // SCOCCA
-  cx.fillStyle = '#fff';
-  cx.strokeStyle = COLORS.chassis;
-  cx.lineWidth = 2;
-  const bodyX = -bodyL/2, bodyY = -bodyW/2;
-  roundedRect(bodyX, bodyY, bodyL, bodyW, mm2px(6)); cx.fill(); cx.stroke();
-
-  // muso e coda
-  cx.beginPath(); cx.moveTo(bodyX, bodyY); cx.lineTo(bodyX - noseL, 0); cx.lineTo(bodyX, bodyY + bodyW); cx.closePath(); cx.fill(); cx.stroke();
-  cx.beginPath(); cx.moveTo(bodyX + bodyL, bodyY); cx.lineTo(bodyX + bodyL + tailL, 0); cx.lineTo(bodyX + bodyL, bodyY + bodyW); cx.closePath(); cx.fill(); cx.stroke();
+  // linee decorative
+  cx.strokeStyle='rgba(34,211,238,.65)'; cx.lineWidth=1.5;
+  cx.beginPath(); cx.moveTo(x0+mm2px(10), y0+mm2px(10)); cx.lineTo(x0+bodyL-mm2px(10), y0+mm2px(10)); cx.stroke();
+  cx.beginPath(); cx.moveTo(x0+mm2px(10), y0+bodyW-mm2px(10)); cx.lineTo(x0+bodyL-mm2px(10), y0+bodyW-mm2px(10)); cx.stroke();
 
   // etichetta
-  if(state.layers.labels){
-    cx.fillStyle = COLORS.muted;
-    cx.font = '12px system-ui';
-    cx.fillText(`Vista ${state.view === 'top' ? 'Sopra' : 'Sotto'}`, -bodyL/2, -bodyW/2 - mm2px(12));
-  }
+  if(state.layers.labels){ cx.fillStyle=C.muted; cx.font='12px Inter, system-ui'; cx.fillText(`Vista ${state.view==='top'?'Sopra':'Sotto'}`, x0, y0 - mm2px(12)); }
 
   cx.restore();
 }
 
-function drawPlatesRollersDampersBrakesWeights(){
-  const {cx:CX, cy:CY} = center();
-  const L = mm2px(BASE.length);
-  const W = mm2px(BASE.width);
-  const WB = mm2px(BASE.wheelbase);
-  const bodyL = L * 0.78;
-  const bodyX = -bodyL/2, bodyY = -W/2;
-  const axOffset = WB/2;
+function drawModules(){
+  const {cx:CX,cy:CY}=center(); const L=mm2px(BASE.length), W=mm2px(BASE.width), WB=mm2px(BASE.wheelbase);
+  const bodyL=L*0.78, x0=-bodyL/2, ax=WB/2;
 
-  cx.save();
-  cx.translate(CX, CY);
-  cx.rotate(state.rot*Math.PI/180);
+  cx.save(); cx.translate(CX,CY); cx.rotate(state.rot*Math.PI/180);
 
-  // PIATRE (FRP) — front/rear
+  // Piastre (bagliore + barra)
   if(state.layers.plates){
-    cx.fillStyle = COLORS.plate;
-    const plateW = mm2px(14), plateL = mm2px(60);
-    // front
-    roundedRect(bodyX - mm2px(8) - plateL, -plateW/2, plateL, plateW, mm2px(3)); cx.globalAlpha=0.25; cx.fill(); cx.globalAlpha=1; 
-    // rear
-    roundedRect(bodyX + bodyL + mm2px(8), -plateW/2, plateL, plateW, mm2px(3)); cx.globalAlpha=0.25; cx.fill(); cx.globalAlpha=1;
+    cx.save();
+    cx.shadowColor='rgba(34,211,238,.6)'; cx.shadowBlur=16; cx.fillStyle=C.plate; 
+    const pw=mm2px(14), pl=mm2px(60);
+    roundedRect(x0 - mm2px(8) - pl, -pw/2, pl, pw, mm2px(4)); cx.globalAlpha=.9; cx.fill(); cx.globalAlpha=1;
+    roundedRect(x0 + bodyL + mm2px(8), -pw/2, pl, pw, mm2px(4)); cx.fill();
+    cx.restore();
   }
 
-  // ROLLER 13/19mm
+  // Roller (glow)
   if(state.layers.rollers){
-    const r13 = mm2px(13/2), r19 = mm2px(19/2);
-    cx.fillStyle = COLORS.roller;
-    // anteriori: estremità piastra front
-    cx.beginPath(); cx.arc(bodyX - mm2px(8) - mm2px(60) + mm2px(6), -W*0.36, r19, 0, Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(bodyX - mm2px(8) - mm2px(60) + mm2px(6),  W*0.36, r19, 0, Math.PI*2); cx.fill();
-    // posteriori: estremità piastra rear
-    cx.beginPath(); cx.arc(bodyX + bodyL + mm2px(8) + mm2px(60) - mm2px(6), -W*0.36, r13, 0, Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(bodyX + bodyL + mm2px(8) + mm2px(60) - mm2px(6),  W*0.36, r13, 0, Math.PI*2); cx.fill();
+    cx.fillStyle=C.roller;
+    const r13=mm2px(6.5), r19=mm2px(9.5);
+    const fX=x0 - mm2px(8) - mm2px(60) + mm2px(6);
+    const rX=x0 + bodyL + mm2px(8) + mm2px(60) - mm2px(6);
+    // front 19
+    drawGlowCircle(fX, -W*0.36, r19*1.6, 'rgba(0,229,168,.45)'); cx.beginPath(); cx.arc(fX, -W*0.36, r19, 0, Math.PI*2); cx.fill();
+    drawGlowCircle(fX,  W*0.36, r19*1.6, 'rgba(0,229,168,.45)'); cx.beginPath(); cx.arc(fX,  W*0.36, r19, 0, Math.PI*2); cx.fill();
+    // rear 13
+    drawGlowCircle(rX, -W*0.36, r13*1.6, 'rgba(0,229,168,.45)'); cx.beginPath(); cx.arc(rX, -W*0.36, r13, 0, Math.PI*2); cx.fill();
+    drawGlowCircle(rX,  W*0.36, r13*1.6, 'rgba(0,229,168,.45)'); cx.beginPath(); cx.arc(rX,  W*0.36, r13, 0, Math.PI*2); cx.fill();
   }
 
-  // DAMPER (8g/12g) — più vicini al posteriore
+  // Damper
   if(state.layers.dampers){
-    cx.fillStyle = COLORS.damper;
-    const dR = mm2px(6);
-    cx.beginPath(); cx.arc(bodyX + bodyL*0.60, -W*0.15, dR, 0, Math.PI*2); cx.fill();
-    cx.beginPath(); cx.arc(bodyX + bodyL*0.60,  W*0.15, dR, 0, Math.PI*2); cx.fill();
+    cx.fillStyle=C.damper;
+    const dR=mm2px(6);
+    drawGlowCircle(x0 + bodyL*0.60, -W*0.15, dR*2.0, 'rgba(255,209,102,.35)');
+    drawGlowCircle(x0 + bodyL*0.60,  W*0.15, dR*2.0, 'rgba(255,209,102,.35)');
+    cx.beginPath(); cx.arc(x0 + bodyL*0.60, -W*0.15, dR, 0, Math.PI*2); cx.fill();
+    cx.beginPath(); cx.arc(x0 + bodyL*0.60,  W*0.15, dR, 0, Math.PI*2); cx.fill();
   }
 
-  // FRENI (sotto) — rappresentati come barre in coda
-  if(state.layers.brakes && state.view === 'bottom'){
-    cx.fillStyle = COLORS.brake;
-    cx.fillRect(bodyX + bodyL + mm2px(6), -mm2px(8), mm2px(30), mm2px(3));
-    cx.fillRect(bodyX + bodyL + mm2px(6),  mm2px(5), mm2px(30), mm2px(3));
+  // Freni (solo vista sotto)
+  if(state.layers.brakes && state.view==='bottom'){
+    cx.fillStyle=C.brake;
+    drawGlowCircle(x0 + bodyL + mm2px(16), -mm2px(8), mm2px(10), 'rgba(255,83,112,.35)');
+    cx.fillRect(x0 + bodyL + mm2px(6), -mm2px(8), mm2px(32), mm2px(3));
+    drawGlowCircle(x0 + bodyL + mm2px(16),  mm2px(6), mm2px(10), 'rgba(255,83,112,.35)');
+    cx.fillRect(x0 + bodyL + mm2px(6),  mm2px(6), mm2px(32), mm2px(3));
   }
 
-  // PESI — distribuzione CG
+  // Pesi
   if(state.layers.weights){
-    cx.fillStyle = COLORS.weight;
-    cx.fillRect(bodyX + bodyL*0.25, -mm2px(6), mm2px(12), mm2px(4));
-    cx.fillRect(bodyX + bodyL*0.35, -mm2px(6), mm2px(12), mm2px(4));
-    cx.fillRect(bodyX + bodyL*0.45,  mm2px(2),  mm2px(12), mm2px(4));
+    cx.fillStyle=C.weight;
+    const p=mm2px(12), t=mm2px(4);
+    drawGlowCircle(x0 + bodyL*0.25, -mm2px(5), p, 'rgba(184,255,90,.25)');
+    cx.fillRect(x0 + bodyL*0.25, -mm2px(6), p, t);
+    drawGlowCircle(x0 + bodyL*0.35, -mm2px(5), p, 'rgba(184,255,90,.25)');
+    cx.fillRect(x0 + bodyL*0.35, -mm2px(6), p, t);
+    drawGlowCircle(x0 + bodyL*0.46,  mm2px(3),  p, 'rgba(184,255,90,.25)');
+    cx.fillRect(x0 + bodyL*0.46,  mm2px(2),  p, t);
   }
 
-  // ETICHETTE
+  // Etichette
   if(state.layers.labels){
-    cx.fillStyle = COLORS.muted; cx.font='12px system-ui';
-    cx.fillText('Piastra front', bodyX - mm2px(75), -mm2px(14));
-    cx.fillText('Piastra rear',  bodyX + bodyL + mm2px(10), -mm2px(14));
-    cx.fillText('Roller 19mm',  bodyX - mm2px(58), -W*0.36 - mm2px(10));
-    cx.fillText('Roller 13mm',  bodyX + bodyL + mm2px(36), -W*0.36 - mm2px(10));
-    if(state.view==='bottom'){ cx.fillText('Freni (sotto)', bodyX + bodyL + mm2px(8), -mm2px(14)); }
-    cx.fillText('Damper 8/12g', bodyX + bodyL*0.60 + mm2px(8), -W*0.15);
-    cx.fillText('Pesi (CG)',    bodyX + bodyL*0.33, mm2px(18));
+    cx.fillStyle=C.muted; cx.font='12px Inter, system-ui';
+    cx.fillText('Piastra front', x0 - mm2px(70), -mm2px(16));
+    cx.fillText('Piastra rear',  x0 + bodyL + mm2px(10), -mm2px(16));
+    cx.fillText('Roller 19mm',   x0 - mm2px(58), -W*0.36 - mm2px(12));
+    cx.fillText('Roller 13mm',   x0 + bodyL + mm2px(36), -W*0.36 - mm2px(12));
+    if(state.view==='bottom'){ cx.fillText('Freni (sotto)', x0 + bodyL + mm2px(10), -mm2px(16)); }
+    cx.fillText('Damper 8/12g',  x0 + bodyL*0.60 + mm2px(8), -W*0.15);
+    cx.fillText('Pesi (CG)',     x0 + bodyL*0.33, mm2px(20));
   }
 
   cx.restore();
@@ -301,26 +265,21 @@ function render(){
   cx.clearRect(0,0,cv.width,cv.height);
   if(state.layers.grid) drawGrid();
   drawChassis();
-  drawPlatesRollersDampersBrakesWeights();
+  drawModules();
 }
 
-// === UI Binds ===
+// UI
 document.querySelectorAll('.chip[data-view]').forEach(b=>{
-  b.onclick = ()=>{ document.querySelectorAll('.chip[data-view]').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active'); state.view = b.dataset.view; render();
-  };
+  b.onclick=()=>{ document.querySelectorAll('.chip[data-view]').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active'); state.view=b.dataset.view; render(); };
 });
-document.getElementById('rot').oninput = e => { state.rot = +e.target.value; document.getElementById('rotLabel').textContent = state.rot+'°'; render(); };
-document.getElementById('scale').oninput = e => { state.scale = +e.target.value; document.getElementById('scaleLabel').textContent = Math.round(state.scale*100)+'%'; render(); };
-document.querySelectorAll('.layer').forEach(ch=>{
-  ch.onchange = ()=>{ state.layers[ch.dataset.layer] = ch.checked; render(); };
-});
-document.getElementById('reset').onclick = ()=>{ state.rot=0; state.scale=1; document.getElementById('rot').value=0; document.getElementById('rotLabel').textContent='0°'; document.getElementById('scale').value=1; document.getElementById('scaleLabel').textContent='100%'; render(); };
-document.getElementById('export').onclick = ()=>{
-  const a=document.createElement('a'); a.download='mini4wd_demo_tecnica.png'; a.href=cv.toDataURL('image/png'); a.click();
-};
+document.getElementById('rot').oninput=e=>{ state.rot=+e.target.value; document.getElementById('rotLabel').textContent=state.rot+'°'; render(); };
+document.getElementById('scale').oninput=e=>{ state.scale=+e.target.value; document.getElementById('scaleLabel').textContent=Math.round(state.scale*100)+'%'; render(); };
+document.querySelectorAll('.layer').forEach(ch=>{ ch.onchange=()=>{ state.layers[ch.dataset.layer]=ch.checked; render(); }; });
+document.getElementById('reset').onclick=()=>{ state.rot=0; state.scale=1; rot.value=0; scale.value=1; rotLabel.textContent='0°'; scaleLabel.textContent='100%'; render(); };
+document.getElementById('export').onclick=()=>{ const a=document.createElement('a'); a.download='mini4wd_demo_cartoon.png'; a.href=cv.toDataURL('image/png'); a.click(); };
 
-// prima render
+// first render
 render();
 </script>
 </body>
