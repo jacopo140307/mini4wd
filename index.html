@@ -2,436 +2,372 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Mini4WD Advisor • B‑MAX / TMEC</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini4WD Advisor — FM-A Blueprint (Top+Bottom Demo)</title>
 <style>
-:root{
-  --bg:#0b1220; --panel:#0f172a; --ink:#e6eeff; --muted:#9fb3ff; --line:#223258;
-  --accent:#22d3ee; --chassis:#203a65; --hole:#93c5fd; --plate:#38bdf8;
-  --roller:#22e3ab; --damper:#ffd166; --brake:#ff5370; --weight:#b8ff5a; --fastener:#cfd8dc;
-}
-*{box-sizing:border-box}
-html,body{margin:0;background:linear-gradient(180deg,#0b1220,#081124);color:var(--ink);font-family:Inter,system-ui,-apple-system}
-.wrap{max-width:1200px;margin:0 auto;padding:16px}
-h1{margin:6px 0 12px;font-size:clamp(22px,3vw,30px)}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;margin:10px 0}
-.panel h2{margin:0;padding:12px 16px;border-bottom:1px solid var(--line);font-size:16px}
-.panel .body{padding:12px 16px}
-.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-select,input,button{border-radius:10px;border:1px solid var(--line);background:#0d1530;color:#e6eeff;padding:8px 10px}
-button.primary{background:linear-gradient(90deg,#7c3aed,#22d3ee);border:0}
-.muted{color:var(--muted);font-size:12px}
-.tabs{display:flex;gap:8px;margin:8px 0}
-.tab{padding:8px 12px;border:1px solid var(--line);border-radius:10px;background:#0d1530;cursor:pointer}
-.tab.active{border-color:var(--accent)}
-canvas,svg{width:100%;height:auto;border:1px solid var(--line);border-radius:14px;background:#0a0f1e}
-.grid{display:grid;gap:12px}
-@media(min-width:1050px){.g2{grid-template-columns:420px 1fr}}
-.hole{fill:var(--hole);stroke:#89c2ff;stroke-width:.35}
-.chip{border:1px solid var(--line);background:#0d1530;padding:7px 10px;border-radius:10px;cursor:pointer}
-.chip.active{border-color:#22d3ee;box-shadow:0 0 0 2px rgba(34,211,238,.15) inset}
-.badge{display:inline-block;padding:2px 6px;border-radius:8px;font-size:11px;margin-left:6px}
-.bmax{background:#0b3b2a;color:#b9ffd6} .tmec{background:#3b1a0b;color:#ffd6b9}
-.list{font-size:14px;line-height:1.6}
-#bgWrap{position:relative}
-#bgImg{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:contain;opacity:.22;pointer-events:none;display:none}
-.small{font-size:12px}
+  :root{
+    --bg:#0f1115; --panel:#141823; --ink:#e6e9f2; --muted:#9aa3b2;
+    --grid:#22283a; --chassis:#6e7691; --glow:#2b9cff;
+    --roller:#3aa0ff; --brake:#ff4655; --damper:#ffd166; --plate:#2b2f3a; --wheel:#9aa3b2; --hw:#c6cbd6;
+  }
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
+  header{padding:12px 16px;border-bottom:1px solid #1f2433;background:linear-gradient(180deg,#151a28,#0f1115 60%);position:sticky;top:0;z-index:50}
+  h1{font-size:16px;margin:0}
+  .sub{color:var(--muted);font-size:12px}
+  .wrap{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:12px 16px}
+  @media (max-width:900px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid #23283a;border-radius:14px;overflow:hidden}
+  .card h2{font-size:14px;margin:0;padding:10px 12px;border-bottom:1px solid #23283a;background:#121624}
+  .pad{padding:12px}
+  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+  .tag{display:inline-flex;align-items:center;gap:6px;background:#111522;border:1px solid #252b3d;border-radius:999px;padding:4px 8px;color:var(--muted)}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .roller{background:var(--roller)} .brake{background:var(--brake)} .damper{background:var(--damper)}
+  .plate{background:var(--plate)} .wheel{background:var(--wheel)} .hw{background:var(--hw)}
+  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .toolbar input[type="search"]{width:100%;max-width:230px;background:#0f1320;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;outline:none}
+  .toolbar .btn{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
+  .toolbar .btn.primary{background:#2b9cff;border-color:#2b9cff;color:#08121e}
+  .toggle{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .toggle button{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:6px 10px;border-radius:10px;cursor:pointer}
+  .toggle button.active{background:#2b9cff;color:#06111e;border-color:#2b9cff}
+  /* Canvas */
+  .stage{background:radial-gradient(1200px 600px at 50% -10%, #151a28 0%, #0f1115 60%);border:1px solid #23283a;border-radius:14px;position:relative;overflow:hidden}
+  svg{width:100%;height:auto;display:block}
+  .grid line{stroke:var(--grid);stroke-width:1;opacity:0.4}
+  .chassis{fill:none;stroke:var(--chassis);stroke-width:1.6;filter: drop-shadow(0 0 2px rgba(0,0,0,.6))}
+  .hole{fill:#2a3045;stroke:#3a4259;stroke-width:1}
+  .mk{cursor:pointer;filter: drop-shadow(0 0 6px rgba(0,0,0,.7))}
+  .mk.roller{fill:var(--roller)} .mk.brake{fill:var(--brake)} .mk.damper{fill:var(--damper)}
+  .mk.plate{fill:var(--plate)} .mk.wheel{fill:var(--wheel)} .mk.hw{fill:var(--hw)}
+  .mk.locked{stroke:#ef4444;stroke-width:2}
+  /* Tooltip */
+  #tip{position:fixed;transform:translate3d(var(--x,0),var(--y,0),0);background:#101423;border:1px solid #2a3045;color:var(--ink);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:100;box-shadow:0 6px 28px rgba(0,0,0,.35)}
+  #tip[hidden]{display:none}
+  /* Modal */
+  dialog{max-width:480px;width:92vw;background:#0f1115;border:1px solid #2a3045;border-radius:14px;color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+  dialog header{display:flex;align-items:center;justify-content:space-between;border:0;padding:12px 14px;background:transparent}
+  dialog .pad{padding:0 14px 14px}
+  dialog img{width:100%;height:auto;border-radius:10px;background:#0a0d16}
+  .muted{color:var(--muted)}
+  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .row > div{flex:1 1 160px}
+  .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+  .actions button{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
+  .actions .primary{background:#2b9cff;border-color:#2b9cff;color:#06111e}
+  .small{font-size:12px}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="row" style="justify-content:space-between">
-    <h1>Mini4WD Advisor • <span class="badge bmax">B‑MAX</span> <span class="badge tmec">TMEC</span></h1>
-    <div class="muted">Accesso: <span id="who">ospite</span></div>
-  </div>
+  <header>
+    <h1>Mini4WD Advisor — FM-A Blueprint (Top+Bottom Demo)</h1>
+    <div class="sub">Layout pulito con marker interattivi (hover/click). I codici Item No. saranno sincronizzati con il catalogo ufficiale Tamiya.</div>
+  </header>
 
-  <!-- Accesso -->
-  <div class="panel">
-    <h2>Accesso</h2>
-    <div class="body row">
-      <input id="u" placeholder="Username"><input id="p" placeholder="Password" type="password">
-      <button id="login">Entra</button><button id="logout" style="display:none">Logout</button>
-      <div class="muted">Credenziali salvate in locale sul dispositivo.</div>
-    </div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" data-tab="analyzer">Analisi Pista</div>
-    <div class="tab" data-tab="advisor">Consigli & Simulazioni</div>
-    <div class="tab" data-tab="builder">Layout Builder</div>
-    <div class="tab" data-tab="catalog">Catalogo</div>
-  </div>
-
-  <!-- ANALYZER -->
-  <div class="panel" id="analyzer">
-    <h2>Analizzatore pista (LAB + scheletro + multi‑foto)</h2>
-    <div class="body grid g2">
-      <div>
-        <div class="row">
-          <label>Regolamento
-            <select id="rules"><option>B-MAX</option><option>TMEC</option></select>
-          </label>
-          <label>Chassis
-            <select id="chassisSel"></select>
-          </label>
+  <div class="wrap">
+    <aside class="card">
+      <h2>Catalogo &amp; Controlli</h2>
+      <div class="pad">
+        <div class="toolbar">
+          <input id="q" type="search" placeholder="Cerca Item No. o nome (es. 'roller 19mm')" aria-label="Cerca nel catalogo">
+          <button class="btn" id="btn-search">Cerca</button>
+          <button class="btn" id="btn-clear">Pulisci</button>
+          <button class="btn primary" id="btn-print">Esporta PDF</button>
         </div>
 
-        <div class="row" style="margin-top:8px;gap:8px">
-          <input id="imgs" type="file" accept="image/*" multiple>
-          <button id="run" class="primary">Analizza</button>
-          <button id="pick" title="Clicca sul canvas per campionare">Seleziona colore pista</button>
-          <button id="posterPreset">Preset locandina (verde)</button>
-          <label>Precisione <input id="tol" type="range" min="8" max="28" value="16"></label>
+        <div class="legend">
+          <span class="tag"><span class="dot roller"></span> Roller</span>
+          <span class="tag"><span class="dot brake"></span> Freni</span>
+          <span class="tag"><span class="dot damper"></span> Damper/Pesi</span>
+          <span class="tag"><span class="dot plate"></span> Piastre/Stay</span>
+          <span class="tag"><span class="dot wheel"></span> Gomme/Ruote</span>
+          <span class="tag"><span class="dot hw"></span> Ferramenta</span>
         </div>
 
-        <div class="row small" style="gap:6px;margin-top:6px">
-          <button id="calib">Calibra (2 punti)</button>
-          <input id="calibLen" type="number" value="1000" style="width:90px"> mm
-          <button id="saveProf">Salva profilo</button>
-          <input id="loadProf" type="file" accept="application/json">
-          <button id="print">Stampa / PDF</button>
+        <div class="toggle" role="tablist" aria-label="Selettore Vista">
+          <button class="active" data-view="top" role="tab" aria-selected="true">Top</button>
+          <button data-view="bottom" role="tab" aria-selected="false">Bottom</button>
         </div>
 
-        <p class="muted">Suggerimento: preset per le locandine Tamiya; per foto reali usa “Seleziona colore pista” su una corsia grigia. Puoi caricare più foto (sezioni): la copertura è mostrata a colori.</p>
-        <div class="list" id="profile"></div>
+        <div class="pad small muted">
+          Suggerimento: tocca un marker per aprire la scheda del componente (foto, Item No., peso, dimensioni). Su mobile: tap → tooltip, secondo tap → scheda.
+        </div>
+
+        <div id="results" class="pad small"></div>
       </div>
+    </aside>
 
-      <div><canvas id="cMain" width="960" height="540"></canvas></div>
-    </div>
-  </div>
+    <main class="card stage">
+      <h2>Blueprint FM-A</h2>
+      <div class="pad" style="padding:0">
+        <!-- SVG STAGE -->
+        <svg id="stage" viewBox="0 0 1000 520" aria-labelledby="title desc" role="img">
+          <title id="title">Blueprint FM-A Demo</title>
+          <desc id="desc">Vista Top o Bottom con marker interattivi.</desc>
 
-  <!-- ADVISOR -->
-  <div class="panel" id="advisor" style="display:none">
-    <h2>Consigli & Simulazioni</h2>
-    <div class="body grid g2">
-      <div>
-        <button id="simulate" class="primary">Esegui simulazione (Top‑3)</button>
-        <div class="list" id="advice" style="margin-top:8px"></div>
-      </div>
-      <div>
-        <canvas id="cAdv" width="960" height="540"></canvas>
-        <div class="muted" style="margin-top:6px">Mappa fori e posizioni consigliate sul telaio selezionato.</div>
-      </div>
-    </div>
-  </div>
+          <!-- Grid -->
+          <g class="grid" opacity="0.35">
+            <g id="gridV"></g>
+            <g id="gridH"></g>
+          </g>
 
-  <!-- BUILDER -->
-  <div class="panel" id="builder" style="display:none">
-    <h2>Layout Builder (snap fori + telai ufficiali Tamiya)</h2>
-    <div class="body grid g2">
-      <div>
-        <div class="row">
-          <label>Vista
-            <select id="view">
-              <option value="top">Sopra</option><option value="bottom">Sotto</option>
-              <option value="left">Lato sinistro</option><option value="right">Lato destro</option>
-              <option value="front">Fronte</option><option value="rear">Retro</option>
-              <option value="iso">Isometrica</option>
-            </select>
-          </label>
-          <label>Chassis
-            <select id="chassis"></select>
-          </label>
-          <label>Categoria
-            <select id="cat"></select>
-          </label>
-          <label>Componente
-            <select id="comp"></select>
-          </label>
-        </div>
-        <div class="row" style="margin-top:8px">
-          <button id="place" class="chip">Aggancia</button>
-          <button id="move" class="chip">Sposta</button>
-          <button id="del" class="chip">Rimuovi</button>
-          <button id="reset">Reset</button>
-          <button id="fixUrl">Correggi URL immagine</button>
-          <button id="exportLayout" class="primary">Export layout JSON</button>
-        </div>
-        <div class="muted">Sfondo = foto ufficiale Tamiya (pagina “Chassis Select”). Se non carica, premi “Correggi URL immagine” e incolla il link della foto dal sito che mi hai dato.</div>
-      </div>
-      <div id="bgWrap">
-        <img id="bgImg" alt="">
-        <svg id="stage" viewBox="-110 -80 220 160" xmlns="http://www.w3.org/2000/svg">
-          <defs><pattern id="mm" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M10 0H0V10" fill="none" stroke="#213050" stroke-width="0.25"/></pattern></defs>
-          <rect x="-110" y="-80" width="220" height="160" fill="url(#mm)"/>
-          <g id="shape"></g><g id="holes"></g><g id="parts"></g>
+          <!-- Chassis contour (stylized FM-A) -->
+          <path id="fm-a" class="chassis" d="
+            M120,60 L880,60 C910,60 930,80 930,110 L930,410 C930,440 910,460 880,460
+            L120,460 C90,460 70,440 70,410 L70,110 C70,80 90,60 120,60 Z
+            M160,120 L840,120 L840,400 L160,400 Z" />
+
+          <!-- Mounting holes (demo grid of M2 points) -->
+          <g id="holes"></g>
+
+          <!-- MARKERS (Top view default) -->
+          <g id="markers-top">
+            <!-- Front rollers (over plate) -->
+            <circle class="mk roller" cx="210" cy="120" r="10"
+              data-name="Roller 19 mm AL (front over)"
+              data-part="(da catalogo)"
+              data-cat="roller" data-view="Top"
+              data-weight="— g" data-size="Ø19 mm"
+              data-img="placeholder"></circle>
+
+            <circle class="mk roller" cx="790" cy="120" r="10"
+              data-name="Roller 19 mm AL (front over)"
+              data-part="(da catalogo)"
+              data-cat="roller" data-view="Top"
+              data-weight="— g" data-size="Ø19 mm"
+              data-img="placeholder"></circle>
+
+            <!-- Rear rollers (under plate) -->
+            <circle class="mk roller" cx="230" cy="400" r="8"
+              data-name="Roller 13 mm AL (rear under)"
+              data-part="(da catalogo)"
+              data-cat="roller" data-view="Top"
+              data-weight="— g" data-size="Ø13 mm"
+              data-img="placeholder"></circle>
+
+            <circle class="mk roller" cx="770" cy="400" r="8"
+              data-name="Roller 13 mm AL (rear under)"
+              data-part="(da catalogo)"
+              data-cat="roller" data-view="Top"
+              data-weight="— g" data-size="Ø13 mm"
+              data-img="placeholder"></circle>
+
+            <!-- Damper block -->
+            <rect class="mk damper" x="470" y="360" width="60" height="18" rx="4"
+              data-name="Mass Damper Block (12 g)"
+              data-part="(da catalogo)"
+              data-cat="damper" data-view="Top"
+              data-weight="12 g" data-size="—"
+              data-img="placeholder"></rect>
+
+            <!-- Wheels (for reference) -->
+            <circle class="mk wheel" cx="260" cy="260" r="26"
+              data-name="Wheel/Tire 26 mm LP"
+              data-part="(da catalogo)"
+              data-cat="wheel" data-view="Top"
+              data-weight="— g" data-size="Ø26 mm"
+              data-img="placeholder"></circle>
+
+            <circle class="mk wheel" cx="740" cy="260" r="26"
+              data-name="Wheel/Tire 26 mm LP"
+              data-part="(da catalogo)"
+              data-cat="wheel" data-view="Top"
+              data-weight="— g" data-size="Ø26 mm"
+              data-img="placeholder"></circle>
+
+            <!-- Front & rear plates (generic position) -->
+            <rect class="mk plate" x="170" y="90" width="660" height="20" rx="4"
+              data-name="Front FRP Stay"
+              data-part="(da catalogo)"
+              data-cat="plate" data-view="Top"
+              data-weight="— g" data-size="—"
+              data-img="placeholder"></rect>
+
+            <rect class="mk plate" x="190" y="390" width="620" height="16" rx="4"
+              data-name="Rear Multi Roller FRP"
+              data-part="(da catalogo)"
+              data-cat="plate" data-view="Top"
+              data-weight="— g" data-size="—"
+              data-img="placeholder"></rect>
+          </g>
+
+          <!-- MARKERS (Bottom view, hidden by default) -->
+          <g id="markers-bottom" style="display:none">
+            <!-- Brake sponge (rear underside) -->
+            <rect class="mk brake" x="420" y="410" width="160" height="10" rx="2"
+              data-name="Brake Sponge (2.5 mm)"
+              data-part="(da catalogo)"
+              data-cat="brake" data-view="Bottom"
+              data-weight="— g" data-size="spessore 2.5 mm, clearance 1.3 mm"
+              data-img="placeholder"></rect>
+
+            <!-- Under guard -->
+            <rect class="mk plate" x="430" y="430" width="140" height="12" rx="3"
+              data-name="Under Guard"
+              data-part="(da catalogo)"
+              data-cat="plate" data-view="Bottom"
+              data-weight="— g" data-size="—"
+              data-img="placeholder"></rect>
+
+            <!-- Hardware (screws) -->
+            <rect class="mk hw" x="220" y="392" width="4" height="30"
+              data-name="Vite M2 2×25"
+              data-part="(da catalogo)"
+              data-cat="hardware" data-view="Bottom"
+              data-weight="— g" data-size="2×25 mm"
+              data-img="placeholder"></rect>
+
+            <rect class="mk hw" x="776" y="392" width="4" height="30"
+              data-name="Vite M2 2×25"
+              data-part="(da catalogo)"
+              data-cat="hardware" data-view="Bottom"
+              data-weight="— g" data-size="2×25 mm"
+              data-img="placeholder"></rect>
+          </g>
         </svg>
       </div>
-    </div>
+    </main>
   </div>
 
-  <!-- CATALOG -->
-  <div class="panel" id="catalog" style="display:none">
-    <h2>Catalogo (cache locale minima, solo Tamiya)</h2>
-    <div class="body">
-      <div id="catList" class="list"></div>
-      <div class="muted">Nella versione server porteremo l’intero catalogo Tamiya con pesi/viti dettagliate.</div>
+  <!-- Tooltip -->
+  <div id="tip" hidden></div>
+
+  <!-- Modal scheda componente -->
+  <dialog id="sheet" aria-labelledby="sh1">
+    <header>
+      <strong id="sh1">Scheda componente</strong>
+      <button class="actions btn" id="close">Chiudi</button>
+    </header>
+    <div class="pad">
+      <img id="pimg" alt="Foto componente" />
+      <div class="row">
+        <div><div class="muted small">Nome</div><div id="pname">—</div></div>
+        <div><div class="muted small">Item No.</div><div id="pcode">(da catalogo)</div></div>
+      </div>
+      <div class="row">
+        <div><div class="muted small">Categoria</div><div id="pcat">—</div></div>
+        <div><div class="muted small">Vista</div><div id="pview">—</div></div>
+      </div>
+      <div class="row">
+        <div><div class="muted small">Peso</div><div id="pwt">—</div></div>
+        <div><div class="muted small">Dimensioni</div><div id="psz">—</div></div>
+      </div>
+      <div class="actions">
+        <button class="primary" id="add">Aggiungi al setup</button>
+      </div>
+      <div class="small muted">Nota: i codici sono placeholder in questa demo offline. La versione collegata al catalogo Tamiya mostrerà foto e Item No. ufficiali.</div>
     </div>
-  </div>
-</div>
+  </dialog>
 
 <script>
-/* ===== Accesso locale ===== */
-const who=document.getElementById('who');
-document.getElementById('login').onclick=()=>{localStorage.m4_user=document.getElementById('u').value;localStorage.m4_pass=document.getElementById('p').value;who.textContent=localStorage.m4_user||'ospite';document.getElementById('logout').style.display='inline-block';}
-document.getElementById('logout').onclick=()=>{delete localStorage.m4_user;delete localStorage.m4_pass;who.textContent='ospite';document.getElementById('logout').style.display='none';}
-if(localStorage.m4_user){who.textContent=localStorage.m4_user;document.getElementById('logout').style.display='inline-block';}
-
-/* ===== Tabs ===== */
-document.querySelectorAll('.tab').forEach(t=>{
-  t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');
-    ['analyzer','advisor','builder','catalog'].forEach(id=>document.getElementById(id).style.display='none');
-    document.getElementById(t.dataset.tab).style.display='';};
-});
-
-/* ===== Telai ufficiali: mappa URL immagini Tamiya =====
-   Se un’immagine non si carica, premi “Correggi URL immagine” e incolla il link dalla pagina:
-   https://www.tamiya.com/english/cms/mini4wd_chassis_select.html */
-const CHASSIS_IMAGES = {
-  SUPER2: { name:'Super‑II',   url:'https://www.tamiya.com/english/images/mini4wd/chassis/super2.jpg'   },
-  MA:     { name:'MA',         url:'https://www.tamiya.com/english/images/mini4wd/chassis/ma.jpg'       },
-  MS:     { name:'MS',         url:'https://www.tamiya.com/english/images/mini4wd/chassis/ms.jpg'       },
-  AR:     { name:'AR',         url:'https://www.tamiya.com/english/images/mini4wd/chassis/ar.jpg'       },
-  VS:     { name:'VS',         url:'https://www.tamiya.com/english/images/mini4wd/chassis/vs.jpg'       },
-  VZ:     { name:'VZ',         url:'https://www.tamiya.com/english/images/mini4wd/chassis/vz.jpg'       },
-  FM_A:   { name:'FM‑A',       url:'https://www.tamiya.com/english/images/mini4wd/chassis/fm-a.jpg'     },
-  SUPERXX:{ name:'Super‑XX',   url:'https://www.tamiya.com/english/images/mini4wd/chassis/superxx.jpg'  }
-};
-
-/* ===== CHASSIS geometry (fori in mm, sagoma semplificata coerente) ===== */
-const CHASSIS = {
-  SUPER2: mkChassis('Super‑II',{path:'M -70,-30 L -78,0 L -70,30 L 70,30 L 78,0 L 70,-30 Z',holes:[{id:'F1',x:-84,y:-10},{id:'F2',x:-84,y:10},{id:'F3',x:-72,y:0},{id:'C1',x:-20,y:-12},{id:'C2',x:-20,y:12},{id:'C3',x:20,y:-12},{id:'C4',x:20,y:12},{id:'R1',x:84,y:-10},{id:'R2',x:84,y:10},{id:'R3',x:72,y:0}]}),
-  MA:     mkChassis('MA',{path:'M -68,-28 L -76,0 L -68,28 L 68,28 L 76,0 L 68,-28 Z',holes:[{id:'F1',x:-82,y:-10},{id:'F2',x:-82,y:10},{id:'F3',x:-70,y:0},{id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},{id:'R1',x:82,y:-10},{id:'R2',x:82,y:10},{id:'R3',x:70,y:0}]}),
-  MS:     mkChassis('MS',{path:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z',holes:[{id:'F1',x:-80,y:-10},{id:'F2',x:-80,y:10},{id:'F3',x:-68,y:0},{id:'C1',x:-16,y:-11},{id:'C2',x:-16,y:11},{id:'C3',x:16,y:-11},{id:'C4',x:16,y:11},{id:'R1',x:80,y:-10},{id:'R2',x:80,y:10},{id:'R3',x:68,y:0}]}),
-  AR:     mkChassis('AR',{path:'M -69,-28 L -77,0 L -69,28 L 69,28 L 77,0 L 69,-28 Z',holes:[{id:'F1',x:-83,y:-10},{id:'F2',x:-83,y:10},{id:'F3',x:-71,y:0},{id:'C1',x:-19,y:-12},{id:'C2',x:-19,y:12},{id:'C3',x:19,y:-12},{id:'C4',x:19,y:12},{id:'R1',x:83,y:-10},{id:'R2',x:83,y:10},{id:'R3',x:71,y:0}]}),
-  VS:     mkChassis('VS',{path:'M -64,-24 L -72,0 L -64,24 L 64,24 L 72,0 L 64,-24 Z',holes:[{id:'F1',x:-78,y:-9},{id:'F2',x:-78,y:9},{id:'F3',x:-66,y:0},{id:'C1',x:-16,y:-10},{id:'C2',x:-16,y:10},{id:'C3',x:16,y:-10},{id:'C4',x:16,y:10},{id:'R1',x:78,y:-9},{id:'R2',x:78,y:9},{id:'R3',x:66,y:0}]}),
-  VZ:     mkChassis('VZ',{path:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z',holes:[{id:'F1',x:-84,y:-10},{id:'F2',x:-84,y:10},{id:'F3',x:-72,y:0},{id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},{id:'R1',x:84,y:-10},{id:'R2',x:84,y:10},{id:'R3',x:72,y:0}]}),
-  FM_A:   mkChassis('FM‑A',{path:'M -66,-26 L -74,0 L -66,26 L 66,26 L 74,0 L 66,-26 Z',holes:[{id:'F1',x:-82,y:-10},{id:'F2',x:-82,y:10},{id:'F3',x:-70,y:0},{id:'C1',x:-18,y:-12},{id:'C2',x:-18,y:12},{id:'C3',x:18,y:-12},{id:'C4',x:18,y:12},{id:'R1',x:82,y:-10},{id:'R2',x:82,y:10},{id:'R3',x:70,y:0}]}),
-  SUPERXX:mkChassis('Super‑XX',{path:'M -72,-30 L -80,0 L -72,30 L 72,30 L 80,0 L 72,-30 Z',holes:[{id:'F1',x:-88,y:-10},{id:'F2',x:-88,y:10},{id:'F3',x:-76,y:0},{id:'C1',x:-22,y:-12},{id:'C2',x:-22,y:12},{id:'C3',x:22,y:-12},{id:'C4',x:22,y:12},{id:'R1',x:88,y:-10},{id:'R2',x:88,y:10},{id:'R3',x:76,y:0}]})
-};
-function mkChassis(name, s){
-  return { name, outline:{top:{type:'path',d:s.path},bottom:{type:'path',d:s.path},
-    left:{type:'rect',x:-78,y:-18,w:156,h:36,rx:8}, right:{type:'rect',x:-78,y:-18,w:156,h:36,rx:8},
-    front:{type:'rect',x:-45,y:-20,w:90,h:40,rx:8}, rear:{type:'rect',x:-45,y:-20,w:90,h:40,rx:8}, iso:{type:'path',d:s.path}},
-    holes:{top:s.holes,bottom:s.holes} };
-}
-
-/* ===== Catalogo minimale (Tamiya only) ===== */
-let CATALOG={
-  roller:{"Roller 19mm Alluminio (ITEM 15459)":{code:"15459",mass:3.2,draw:{type:"circle",r:9.5,fill:"var(--roller)"}},
-          "Roller 13mm Alluminio (ITEM 15413)":{code:"15413",mass:1.9,draw:{type:"circle",r:6.5,fill:"var(--roller)"}}},
-  plate: {"FRP Front Wide (ITEM 15430)":{code:"15430",mass:6.8,draw:{type:"rect",w:60,h:10,rx:4,fill:"var(--plate)"}},
-          "FRP Rear Multi (ITEM 15518)":{code:"15518",mass:7.2,draw:{type:"rect",w:60,h:10,rx:4,fill:"var(--plate)"}}},
-  damper:{"Mass Damper 12g (ITEM 15441)":{code:"15441",mass:12,draw:{type:"circle",r:6,fill:"var(--damper)"}},
-          "Mass Damper 8g (ITEM 15440)":{code:"15440",mass:8,draw:{type:"circle",r:5.2,fill:"var(--damper)"}}},
-  brake: {"Sponge Brake 1mm (ITEM 15423)":{code:"15423",mass:1.5,draw:{type:"rect",w:32,h:3,rx:1.5,fill:"var(--brake)"}},
-          "Sponge Brake 0.5mm (ITEM 15422)":{code:"15422",mass:1.0,draw:{type:"rect",w:32,h:3,rx:1.5,fill:"var(--brake)"}}},
-  weight:{"Ottone 6x12 (ITEM 15524)":{code:"15524",mass:3.0,draw:{type:"rect",w:12,h:4,rx:1.2,fill:"var(--weight)"}}},
-  gear:  {"3.5:1 High-Speed (ITEM 15349)":{code:"15349",mass:1.2,draw:{type:"circle",r:7,fill:"#ffe08a"}},
-          "4:1 High-Speed (ITEM 15355)":{code:"15355",mass:1.2,draw:{type:"circle",r:7,fill:"#ffe08a"}}},
-  motor: {"Hyper‑Dash 3":{code:"",mass:17,draw:{type:"rect",w:12,h:8,rx:1.4,fill:"#8ab4f8"}}},
-  fastener:{"Vite 2x8":{code:"",mass:0.2,draw:{type:"rect",w:2,h:8,rx:.5,fill:"var(--fastener)"}},
-            "Rondella 2mm":{code:"",mass:0.05,draw:{type:"circle",r:1.5,fill:"var(--fastener)"}},
-            "Distanziale 2x5":{code:"",mass:0.1,draw:{type:"rect",w:5,h:2,rx:.5,fill:"var(--fastener)"}}}
-};
-
-/* ===== Selectors ===== */
-const chassisSel1=document.getElementById('chassisSel'), chassisSel2=document.getElementById('chassis');
-const catSel=document.getElementById('cat'), compSel=document.getElementById('comp');
-function fillSelectors(){
-  const keys=Object.keys(CHASSIS);
-  chassisSel1.innerHTML=keys.map(k=>`<option value="${k}">${CHASSIS[k].name}</option>`).join('');
-  chassisSel2.innerHTML=keys.map(k=>`<option value="${k}">${CHASSIS[k].name}</option>`).join('');
-  const cats=Object.keys(CATALOG); catSel.innerHTML=cats.map(k=>`<option value="${k}">${k}</option>`).join(''); fillComp();
-}
-function fillComp(){ const cat=catSel.value; const list=Object.keys(CATALOG[cat]||{}); compSel.innerHTML=list.map(n=>`<option>${n}</option>`).join(''); }
-
-/* ===== ANALYZER (LAB + scheletro + multi‑foto + calibrazione + coverage) ===== */
-const cMain=document.getElementById('cMain'), ctxMain=cMain.getContext('2d');
-let lastProfile=null, pickedLab=null, mmPerPx=2;
-
-document.getElementById('posterPreset').onclick=()=>{ pickedLab=[80,0,0]; document.getElementById('tol').value=18; };
-document.getElementById('pick').onclick=()=>{ 
-  pickedLab=null; cMain.style.cursor='crosshair';
-  const once=(e)=>{ const r=cMain.getBoundingClientRect();
-    const x=Math.round((e.clientX-r.left)*cMain.width/r.width), y=Math.round((e.clientY-r.top)*cMain.height/r.height);
-    const id=ctxMain.getImageData(0,0,cMain.width,cMain.height); const i=(y*cMain.width+x)*4;
-    pickedLab=rgb2lab(id.data[i],id.data[i+1],id.data[i+2]); cMain.style.cursor='default'; cMain.removeEventListener('mousedown',once); };
-  cMain.addEventListener('mousedown',once);
-};
-document.getElementById('calib').onclick=()=>{
-  const pts=[]; cMain.style.cursor='crosshair';
-  const pickPt=(e)=>{
-    const r=cMain.getBoundingClientRect();
-    const x=(e.clientX-r.left)*cMain.width/r.width;
-    const y=(e.clientY-r.top )*cMain.height/r.height;
-    pts.push([x,y]);
-    if(pts.length===2){
-      cMain.removeEventListener('mousedown',pickPt);
-      cMain.style.cursor='default';
-      const dx=pts[0][0]-pts[1][0], dy=pts[0][1]-pts[1][1];
-      const px = Math.hypot(dx,dy);
-      const mm = parseFloat(document.getElementById('calibLen').value||1000);
-      if(px>0) mmPerPx = mm/px;
-      alert('Calibrazione mm/px: '+mmPerPx.toFixed(3));
+// Disegna griglia e fori M2 di demo
+(function(){
+  const gridV = document.getElementById('gridV');
+  const gridH = document.getElementById('gridH');
+  for(let x=0; x<=1000; x+=50){
+    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',x); ln.setAttribute('y1',0);
+    ln.setAttribute('x2',x); ln.setAttribute('y2',520);
+    gridV.appendChild(ln);
+  }
+  for(let y=0; y<=520; y+=50){
+    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+    ln.setAttribute('x1',0); ln.setAttribute('y1',y);
+    ln.setAttribute('x2',1000); ln.setAttribute('y2',y);
+    gridH.appendChild(ln);
+  }
+  const holes = document.getElementById('holes');
+  // Fori di esempio dentro il rettangolo interno (160..840, 120..400)
+  for(let y=140, r=1; y<=380; y+=70, r++){
+    for(let x=200, c=1; x<=800; x+=80, c++){
+      const h = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      h.setAttribute('class','hole'); h.setAttribute('cx',x); h.setAttribute('cy',y); h.setAttribute('r',3);
+      const tt = document.createElementNS('http://www.w3.org/2000/svg','title');
+      tt.textContent = `Foro M2 F${r}${c}`; h.appendChild(tt);
+      holes.appendChild(h);
     }
-  };
-  cMain.addEventListener('mousedown',pickPt);
-};
-
-document.getElementById('run').onclick=async()=>{
-  const files=[...document.getElementById('imgs').files]; if(!files.length){alert('Carica almeno una foto.');return;}
-  const tol=parseInt(document.getElementById('tol').value,10);
-  let unionMask=null,W=0,H=0,lastImg=null,layers=[];
-  for(const f of files){
-    const img=await fileToImg(f); const scale=Math.min(1,960/img.naturalWidth);
-    const w=Math.round(img.naturalWidth*scale), h=Math.round(img.naturalHeight*scale);
-    if(!W){W=w;H=h;cMain.width=W;cMain.height=H;}
-    ctxMain.clearRect(0,0,W,H); ctxMain.drawImage(img,0,0,W,H); lastImg=img;
-    const id=ctxMain.getImageData(0,0,W,H);
-    const mask=morphClose(maskByLab(id,pickedLab,tol),W,H,1);
-    layers.push(mask);
-    unionMask=unionMask?orMask(unionMask,mask):mask;
   }
-  drawCoverage(layers,W,H); // preview copertura
-  const edges=sobelEdges(unionMask,W,H,18);
-  const skel=zhangSuenSkeleton(unionMask,W,H);
-  const feat=curvatureFromSkeleton(skel,W,H);
-  ctxMain.drawImage(lastImg,0,0,W,H); const idFull=ctxMain.getImageData(0,0,W,H);
-  const bright=highBrightMask(idFull,0.93,0.12);
-  const feats=countElongated(blendMask(unionMask,bright,W,H),W,H);
-  const straightRatio=Math.min(0.95,Math.max(0.05, feat.straight/(feat.straight+feat.curve+1)));
-  const prof={length_m:Math.max(20,(edges.count/220)*mmPerPx/1000*1000),straight_pct:straightRatio,curve_pct:1-straightRatio,tight_curves:feat.tight,jumps:feats.longRects,banked:feats.veryLong,slope_max:(feats.veryLong>0||feats.longRects>0)?10:6,surface:'liscia'};
-  lastProfile=prof; showProfile(prof); drawComposite(unionMask,edges,skel,W,H);
-  renderAdvice(computeAdvice(prof,document.getElementById('rules').value,document.getElementById('chassisSel').value));
-};
-document.getElementById('saveProf').onclick=()=>{ if(!lastProfile) return alert('Nessun profilo da salvare.'); const blob=new Blob([JSON.stringify(lastProfile,null/2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='profilo_pista.json'; a.click(); };
-document.getElementById('loadProf').onchange=async(e)=>{ const f=e.target.files[0]; if(!f) return; const txt=await f.text(); lastProfile=JSON.parse(txt); showProfile(lastProfile); };
-document.getElementById('print').onclick=()=>window.print();
+})();
+</script>
+<script>
+// Tooltip & modal
+const tip = document.getElementById('tip');
+const stage = document.getElementById('stage');
+const dlg = document.getElementById('sheet');
+const pimg = document.getElementById('pimg');
+const pname = document.getElementById('pname');
+const pcode = document.getElementById('pcode');
+const pcat = document.getElementById('pcat');
+const pview = document.getElementById('pview');
+const pwt = document.getElementById('pwt');
+const psz = document.getElementById('psz');
+const btnClose = document.getElementById('close');
+const btnAdd = document.getElementById('add');
 
-function fileToImg(file){return new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.src=URL.createObjectURL(file);});}
-function drawCoverage(layers,W,H){
-  const img=ctxMain.createImageData(W,H); const palette=[[255,80,80],[80,255,160],[80,160,255],[255,200,80],[200,80,255],[120,255,255]];
-  for(let k=0;k<layers.length;k++){const mask=layers[k], col=palette[k%palette.length];
-    for(let i=0;i<mask.length;i++){ if(mask[i]){ const j=i*4; img.data[j]=Math.max(img.data[j],col[0]); img.data[j+1]=Math.max(img.data[j+1],col[1]); img.data[j+2]=Math.max(img.data[j+2],col[2]); img.data[j+3]=255; } } }
-  ctxMain.putImageData(img,0,0);
+function showTip(e){
+  const t = e.target;
+  if(!t.classList || !t.classList.contains('mk')){ tip.hidden = true; return; }
+  tip.textContent = `${t.dataset.cat} · ${t.dataset.view}`;
+  tip.style.setProperty('--x', (e.clientX+14)+'px');
+  tip.style.setProperty('--y', (e.clientY+14)+'px');
+  tip.hidden = false;
 }
-function rgb2xyz(r,g,b){r/=255;g/=255;b/=255;r=(r>0.04045)?Math.pow((r+0.055)/1.055,2.4):r/12.92;g=(g>0.04045)?Math.pow((g+0.055)/1.055,2.4):g/12.92;b=(b>0.04045)?Math.pow((b+0.055)/1.055,2.4):b/12.92;const x=r*0.4124+g*0.3576+b*0.1805,y=r*0.2126+g*0.7152+b*0.0722,z=r*0.0193+g*0.1192+b*0.9505;return [x,y,z];}
-function xyz2lab(x,y,z){const Xr=0.95047,Yr=1.0,Zr=1.08883;let fx=f(x/Xr),fy=f(y/Yr),fz=f(z/Zr);return [116*fy-16,500*(fx-fy),200*(fy-fz)];function f(t){return t>0.008856?Math.cbrt(t):(7.787*t+16/116);}}
-function rgb2lab(r,g,b){const [x,y,z]=rgb2xyz(r,g,b);return xyz2lab(x,y,z);}
-function distLab(a,b){const dl=a[0]-b[0],da=a[1]-b[1],db=a[2]-b[2];return Math.sqrt(dl*dl+da*da+db*db);}
-function maskByLab(imgData,picked,tol){const {data,width:w,height:h}=imgData;let labRef=picked;if(!labRef){let L=0,A=0,B=0,N=0;for(let i=0;i<data.length;i+=16){const r=data[i],g=data[i+1],b=data[i+2];const max=Math.max(r,g,b),min=Math.min(r,g,b),sat=(max-min)/(max||1);if(sat<0.18&&max>120){const LAB=rgb2lab(r,g,b);L+=LAB[0];A+=LAB[1];B+=LAB[2];N++;}}labRef=[L/N||70,A/N||0,B/N||0];}
-  const out=new Uint8ClampedArray(w*h);for(let i=0,mi=0;i<data.length;i+=4,mi++){const d=distLab(rgb2lab(data[i],data[i+1],data[i+2]),labRef);out[mi]=(d<tol)?255:0;}return out;}
-function morphClose(m,w,h,rad){return erode(dilate(m,w,h,rad),w,h,rad);}
-function dilate(m,w,h,rad){const out=new Uint8ClampedArray(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){let v=0;for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<w&&yy<h&&m[yy*w+xx]){v=255;dx=dy=rad+1;}}out[y*w+x]=v;}return out;}
-function erode(m,w,h,rad){const out=new Uint8ClampedArray(w*h);for(let y=0;y<h;y++)for(let x=0;x<w;x++){let v=255;for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<w&&yy<h&&!m[yy*w+xx]){v=0;dx=dy=rad+1;}}out[y*w+x]=v;}return out;}
-function orMask(a,b){const o=new Uint8ClampedArray(a.length);for(let i=0;i<a.length;i++)o[i]=(a[i]||b[i])?255:0;return o;}
-function sobelEdges(mask,w,h,th=18){const Gx=[-1,0,1,-2,0,2,-1,0,1],Gy=[-1,-2,-1,0,0,0,1,2,1];const mag=new Float32Array(w*h),ang=new Float32Array(w*h);let count=0;for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){let sx=0,sy=0,ki=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++,ki++){sx+=(mask[(y+dy)*w+(x+dx)]?1:0)*Gx[ki];sy+=(mask[(y+dy)*w+(x+dx)]?1:0)*Gy[ki];}const m=Math.hypot(sx,sy);if(m>th){mag[y*w+x]=m;ang[y*w+x]=Math.atan2(sy,sx);count++;}}return {mag,ang,count,w,h};}
-function zhangSuenSkeleton(mask,w,h){const im=new Uint8Array(mask.length);for(let i=0;i<mask.length;i++)im[i]=mask[i]?1:0;const idx=(x,y)=>y*w+x;let changed=true,iter=0;while(changed&&iter<40){changed=false;iter++;const rem=[];for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const p=im[idx(x,y)];if(!p)continue;const n=neighbors(im,x,y,w,h),bp=n.sum,ap=n.transitions;if(bp>=2&&bp<=6&&ap===1&&(n.p2*n.p4*n.p6)===0&&(n.p4*n.p6*n.p8)===0)rem.push(idx(x,y));}if(rem.length){for(const i of rem)im[i]=0;changed=true;}const rem2=[];for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++){const p=im[idx(x,y)];if(!p)continue;const n=neighbors(im,x,y,w,h),bp=n.sum,ap=n.transitions;if(bp>=2&&bp<=6&&ap===1&&(n.p2*n.p4*n.p8)===0&&(n.p2*n.p6*n.p8)===0)rem2.push(idx(x,y));}if(rem2.length){for(const i of rem2)im[i]=0;changed=true;}}return im;}
-function neighbors(im,x,y,w,h){const P=(xx,yy)=>im[yy*w+xx]|0;const p2=P(x,y-1),p3=P(x+1,y-1),p4=P(x+1,y),p5=P(x+1,y+1),p6=P(x,y+1),p7=P(x-1,y+1),p8=P(x-1,y),p9=P(x-1,y-1);const arr=[p2,p3,p4,p5,p6,p7,p8,p9,p2];let transitions=0,sum=p2+p3+p4+p5+p6+p7+p8+p9;for(let i=0;i<8;i++) if(arr[i]===0&&arr[i+1]===1)transitions++;return {p2,p3,p4,p5,p6,p7,p8,p9,sum,transitions};}
-function curvatureFromSkeleton(skel,w,h){let straight=0,curve=0,tight=0;const angAt=(x,y)=>{let vx=0,vy=0,c=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dx===0&&dy===0)continue;const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue; if(skel[yy*w+xx]){vx+=dx;vy+=dy;c++;}}if(c===0)return null;return Math.atan2(vy,vx);};for(let y=2;y<h-2;y++)for(let x=2;x<w-2;x++){if(!skel[y*w+x])continue;const a1=angAt(x,y),a2=angAt(x+1,y+1);if(a1==null||a2==null)continue;let d=Math.abs(a1-a2);if(d>Math.PI)d=2*Math.PI-d; if(d<0.18)straight++; else{curve++; if(d>0.45) tight++;}}return {straight,curve,tight};}
-function highBrightMask(imgData,vThr=0.93,sMax=0.12){const {data,width:w,height:h}=imgData;const m=new Uint8ClampedArray(w*h);for(let i=0,mi=0;i<data.length;i+=4,mi++){const r=data[i],g=data[i+1],b=data[i+2];const max=Math.max(r,g,b),min=Math.min(r,g,b);const v=max/255,s=max?((max-min)/max):0;m[mi]=(v>vThr&&s<sMax)?255:0;}return m;}
-function blendMask(a,b,w,h){const out=new Uint8ClampedArray(w*h);for(let i=0;i<out.length;i++)out[i]=(a[i]&&b[i])?255:0;return out;}
-function countElongated(mask,w,h){const lab=new Int32Array(w*h);let label=0;const qx=new Int32Array(w*h),qy=new Int32Array(w*h);const stats=[];for(let y=0;y<h;y++)for(let x=0;x<w;x++){const idx=y*w+x;if(mask[idx]&&lab[idx]===0){label++;let minx=x,maxx=x,miny=y,maxy=y,head=0,tail=0;qx[tail]=x;qy[tail]=y;tail++;lab[idx]=label;while(head<tail){const cx=qx[head],cy=qy[head];head++;for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=cx+dx,ny=cy+dy;if(nx>=0&&ny>=0&&nx<w&&ny<h){const nidx=ny*w+nx;if(mask[nidx]&&lab[nidx]===0){lab[nidx]=label;qx[tail]=nx;qy[tail]=ny;tail++;if(nx<minx)minx=nx;if(nx>maxx)maxx=nx;if(ny<miny)miny=ny;if(ny>maxy)maxy=ny;}}}}const ww=maxx-minx+1,hh=maxy-miny+1,area=ww*hh;if(area>2000)stats.push({ww,hh,ratio:ww/hh});}}let longRects=0,veryLong=0;for(const s of stats){if(s.ratio>3)longRects++;if(s.ratio>4.5)veryLong++;}return {longRects,veryLong};}
-function drawMask(mask,w,h){const img=ctxMain.createImageData(w,h);for(let i=0;i<mask.length;i++){const j=i*4,v=mask[i]?235:12;img.data[j]=v;img.data[j+1]=v;img.data[j+2]=v;img.data[j+3]=255;}ctxMain.putImageData(img,0,0);}
-function drawComposite(mask,edges,skel,w,h){const img=ctxMain.createImageData(w,h);for(let i=0;i<mask.length;i++){const j=i*4,v=mask[i]?235:12;img.data[j]=v;img.data[j+1]=v;img.data[j+2]=v;img.data[j+3]=255;}for(let i=0;i<edges.mag.length;i++){if(edges.mag[i]>0){const j=i*4;img.data[j]=255;img.data[j+1]=120;img.data[j+2]=0;img.data[j+3]=255;}}for(let i=0;i<skel.length;i++){if(skel[i]){const j=i*4;img.data[j]=0;img.data[j+1]=240;img.data[j+2]=255;img.data[j+3]=255;}}ctxMain.putImageData(img,0,0);}
-function showProfile(p){document.getElementById('profile').innerHTML=`<b>Lunghezza:</b> ${p.length_m.toFixed(1)} m<br><b>Rettifili:</b> ${(p.straight_pct*100|0)}% • <b>Curve:</b> ${(p.curve_pct*100|0)}% • <b>Curve strette:</b> ${p.tight_curves}<br><b>Salti:</b> ${p.jumps} • <b>Paraboliche:</b> ${p.banked} • <b>Pendenza max:</b> ${p.slope_max.toFixed(1)}°`;}
-
-/* ===== Consigli & simulazioni ===== */
-const cAdv=document.getElementById('cAdv'), ctxAdv=cAdv.getContext('2d');
-document.getElementById('simulate').onclick=()=>{ if(!lastProfile){alert('Esegui prima l’analisi.');return;} const rules=document.getElementById('rules').value; const chKey=chassisSel1.value; const top3=runSimulations(lastProfile,rules,chKey); renderTop3(top3,chKey); };
-function computeAdvice(p,rules,chKey){
-  const picks=[];
-  picks.push({cat:'plate',name:pick('plate','FRP Front'),pos:['F1','F2','F3']});
-  picks.push({cat:'plate',name:pick('plate','Rear'),pos:['R1','R2','R3']});
-  (p.curve_pct<0.35)
-    ? picks.push({cat:'roller',name:pickName('roller','19mm'),pos:['F1','F2']})
-    : picks.push({cat:'roller',name:pickName('roller','19mm'),pos:['F1','F2']},{cat:'roller',name:pickName('roller','13mm'),pos:['R1','R2']});
-  const heavyRear = p.jumps>0 || p.banked>0 || p.slope_max>8;
-  picks.push({cat:'damper',name:pickName('damper',heavyRear?'12g':'8g'),pos:['C3','C4']});
-  if(heavyRear) picks.push({cat:'damper',name:pickName('damper','8g'),pos:['C1','C2']});
-  picks.push({cat:'brake',name:pickName('brake',p.jumps>0?'1mm':'0.5mm'),pos:['R1','R2']});
-  picks.push({cat:'weight',name:pick('weight','Ottone'),pos:['C2','C3']});
-  const ratio = p.straight_pct>0.6 ? '3.5:1' : (p.curve_pct>0.5 ? '4:1' : '3.7:1');
-  picks.push({cat:'gear',name:pickName('gear',ratio),pos:[]});
-  picks.push({cat:'motor',name:pick('motor','Dash')||'Hyper‑Dash 3',pos:[]});
-  picks.push({cat:'fastener',name:'Viti/Rondelle/Distanziali',pos:[]});
-  return {chassis:CHASSIS[chKey].name, rules, items:picks};
+function openSheet(e){
+  const t = e.target;
+  if(!t.classList || !t.classList.contains('mk')) return;
+  pname.textContent = t.dataset.name || '—';
+  pcode.textContent = t.dataset.part || '(da catalogo)';
+  pcat.textContent  = t.dataset.cat || '—';
+  pview.textContent = t.dataset.view || '—';
+  pwt.textContent   = t.dataset.weight || '—';
+  psz.textContent   = t.dataset.size || '—';
+  // placeholder image
+  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'>
+    <rect width='100%%' height='100%%' fill='#0a0d16'/>
+    <text x='50%%' y='50%%' dominant-baseline='middle' text-anchor='middle'
+      fill='#2b9cff' font-size='42' font-family='system-ui,Segoe UI,Roboto'>Foto componente (demo offline)</text>
+  </svg>`;
+  pimg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  dlg.showModal();
 }
-function runSimulations(p){ const rollers=filterNames('roller',['19mm','13mm']), gears=filterNames('gear',['3.5:1','3.7:1','4:1']), brakes=filterNames('brake',['1mm','0.5mm']), dampers=filterNames('damper',['12g','8g']); const results=[]; for(const r of rollers) for(const g of gears) for(const b of brakes) for(const d of dampers){ const cfg={roller:r,gear:g,brake:b,damper:d}; const s=scoreConfig(cfg,p); results.push({cfg,score:s}); } results.sort((a,b)=>b.score-a.score); return results.slice(0,3); }
-function scoreConfig(cfg,p){ let speed=100*(p.straight_pct+0.3)*(cfg.gear.includes('3.5')?1.05:cfg.gear.includes('3.7')?1.0:0.92); let corner=100*(1-p.straight_pct)*(cfg.roller.includes('13mm')?1.05:0.98); let stability=100*((cfg.damper.includes('12g')?1.05:1.0)-(cfg.brake.includes('0.5')&&p.jumps>0?0.04:0)); let penalty=0; if(p.slope_max>10&&cfg.brake.includes('0.5')) penalty+=6; if(p.jumps>2&&cfg.damper.includes('8g')) penalty+=5; return speed*0.45+corner*0.25+stability*0.30-penalty; }
-function renderTop3(top3,chKey){
-  const ch=CHASSIS[chKey];
-  let html=`<b>Top‑3 setup</b> (chassis: ${ch.name})<br><br>`;
-  top3.forEach((r,i)=>{ html+=`<b>#${i+1}</b> — Roller: ${r.cfg.roller}, Gear: ${r.cfg.gear}, Brake: ${r.cfg.brake}, Damper: ${r.cfg.damper} <span class="muted">(score ${r.score.toFixed(1)})</span><br>`; });
-  document.getElementById('advice').innerHTML=html;
+stage.addEventListener('pointermove', showTip);
+stage.addEventListener('pointerleave', ()=> tip.hidden = true);
+stage.addEventListener('click', openSheet);
+btnClose.addEventListener('click', ()=> dlg.close());
+btnAdd.addEventListener('click', ()=> { alert('Aggiunto al setup (demo). Nella versione completa useremo i codici ufficiali dal catalogo Tamiya.'); });
 
-  // Disegna fori + posizioni consigliate
-  ctxAdv.clearRect(0,0,cAdv.width,cAdv.height);
-  // semplice schema chassis (top)
-  ctxAdv.save(); ctxAdv.translate(cAdv.width/2,cAdv.height/2); const scale=4; ctxAdv.scale(scale,scale);
-  ctxAdv.strokeStyle="#7aa0ff"; ctxAdv.lineWidth=0.5; drawOutlinePath(ctxAdv, ch.outline.top);
-  // fori
-  (CHASSIS[Object.keys(CHASSIS).find(k=>CHASSIS[k].name===ch.name)]?.holes?.top||[]).forEach(h=>{ ctxAdv.fillStyle="#93c5fd"; circ(ctxAdv,h.x,h.y,1.5,true); });
-  // consigli
-  ctxAdv.fillStyle="#22e3ab"; ctxAdv.strokeStyle="#22e3ab";
-  const best=top3[0]; if(best){ // posizioniamo roller / damper / brake / weight come markers
-    const posMap={};
-    best.cfg && null; // no-op
-    // dal computeAdvice (ultimo calcolato in run) recuperiamo picks per posizioni indicative
-    const rec=computeAdvice(lastProfile, document.getElementById('rules').value, document.getElementById('chassisSel').value);
-    rec.items.forEach(it=>{
-      const color = it.cat==='roller'?'#22e3ab':it.cat==='damper'?'#ffd166':it.cat==='brake'?'#ff5370':it.cat==='weight'?'#b8ff5a':'#38bdf8';
-      ctxAdv.fillStyle=color; ctxAdv.strokeStyle=color;
-      (it.pos||[]).forEach(id=>{
-        const hole=(CHASSIS[Object.keys(CHASSIS).find(k=>CHASSIS[k].name===ch.name)]?.holes?.top||[]).find(h=>h.id===id);
-        if(hole){ circ(ctxAdv,hole.x,hole.y,2.2,true); }
-      });
-    });
-  }
-  ctxAdv.restore();
+// View toggle
+const btns = document.querySelectorAll('.toggle button');
+const gTop = document.getElementById('markers-top');
+const gBottom = document.getElementById('markers-bottom');
+btns.forEach(b=>b.addEventListener('click', ()=>{
+  btns.forEach(x=>x.classList.remove('active')); b.classList.add('active');
+  const v = b.dataset.view;
+  if(v==='top'){ gTop.style.display=''; gBottom.style.display='none'; }
+  else { gTop.style.display='none'; gBottom.style.display=''; }
+}));
+
+// Search (demo locale — scandisce i marker come finto catalogo)
+const q = document.getElementById('q');
+const results = document.getElementById('results');
+function search(){
+  const s = (q.value||'').trim().toLowerCase();
+  if(!s){ results.textContent=''; return; }
+  const mks = stage.querySelectorAll('.mk');
+  const rows = [];
+  mks.forEach(m=>{
+    const text = (m.dataset.name+' '+m.dataset.cat+' '+m.dataset.part).toLowerCase();
+    if(text.includes(s)){
+      rows.push(`<div>• <b>${m.dataset.name}</b> — <span class="muted">${m.dataset.cat}</span> — Item: <i>${m.dataset.part}</i></div>`);
+    }
+  });
+  results.innerHTML = rows.length? rows.join('') : '<div class="muted">Nessun risultato nella demo locale. La versione collegata mostrerà il catalogo completo Tamiya.</div>';
 }
-function drawOutlinePath(ctx,o){
-  if(!o) return;
-  if(o.type==='path'){ const p=new Path2D(o.d); ctx.stroke(p); }
-  if(o.type==='rect'){ ctx.strokeRect(o.x,o.y,o.w,o.h); }
-}
-function circ(ctx,x,y,r,fill){ ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); fill?ctx.fill():ctx.stroke(); }
+document.getElementById('btn-search').onclick = search;
+document.getElementById('btn-clear').onclick = ()=>{ q.value=''; results.textContent=''; };
 
-function pick(cat,hint){ const list=Object.keys(CATALOG[cat]||{}); return list.find(n=>n.includes(hint))||list[0]||''; }
-function pickName(cat,hint){ const list=Object.keys(CATALOG[cat]||{}); return list.find(n=>n.toLowerCase().includes(hint.toLowerCase()))||list[0]||''; }
-function filterNames(cat,hints){ const all=Object.keys(CATALOG[cat]||{}); const out=[]; for(const h of hints){ const f=all.find(n=>n.toLowerCase().includes(h.toLowerCase())); if(f) out.push(f);} return out.length?out:all.slice(0,2); }
-
-/* ===== Builder (SVG + snap fori + sfondo immagine Tamiya) ===== */
-const stage=document.getElementById('stage'), Gshape=document.getElementById('shape'), Gholes=document.getElementById('holes'), Gparts=document.getElementById('parts'), bg=document.getElementById('bgImg');
-let mode='place', selected=null;
-document.getElementById('place').onclick=()=>setMode('place'); document.getElementById('move').onclick=()=>setMode('move'); document.getElementById('del').onclick=()=>setMode('del'); document.getElementById('reset').onclick=()=>{Gparts.innerHTML='';};
-function setMode(m){mode=m; document.querySelectorAll('#builder .chip').forEach(b=>b.classList.remove('active')); document.getElementById(m).classList.add('active');}
-document.getElementById('chassis').onchange=()=>{renderBuilder();loadBgImage();};
-document.getElementById('view').onchange=renderBuilder;
-document.getElementById('fixUrl').onclick=()=>{
-  const key=document.getElementById('chassis').value;
-  const cur=CHASSIS_IMAGES[key]?.url||'';
-  const u=prompt('Nuovo URL immagine per '+(CHASSIS_IMAGES[key]?.name||key), cur);
-  if(u){ CHASSIS_IMAGES[key].url=u; loadBgImage(true); }
-};
-function renderBuilder(){ const key=document.getElementById('chassis').value||Object.keys(CHASSIS)[0]; const view=document.getElementById('view').value||'top'; drawOutline(key,view); fillComp(); }
-function drawOutline(key,view){ Gshape.innerHTML=''; Gholes.innerHTML=''; const ch=CHASSIS[key], o=ch.outline[view]||ch.outline.top; if(o.type==='path') Gshape.appendChild(svgEl('path',{d:o.d,fill:'var(--chassis)',stroke:'#7aa0ff','stroke-width':.8})); if(o.type==='rect') Gshape.appendChild(svgEl('rect',{x:o.x,y:o.y,width:o.w,height:o.h,rx:o.rx||0,fill:'var(--chassis)',stroke:'#7aa0ff','stroke-width':.8})); (ch.holes[view]||ch.holes.top).forEach(h=>{ const c=svgEl('circle',{cx:h.x,cy:h.y,r:1.7,class:'hole'}); c.dataset.hole=h.id; Gholes.appendChild(c); }); }
-function svgEl(tag,attrs){ const e=document.createElementNS('http://www.w3.org/2000/svg',tag); for(const k in attrs) e.setAttribute(k,attrs[k]); return e; }
-stage.addEventListener('click',(e)=>{ const hole=e.target.closest('circle.hole'); const pn=e.target.closest('g[data-part]'); if(mode==='place'){ if(!hole) return; const cat=catSel.value, name=compSel.value; const spec=CATALOG[cat]?.[name]; if(!spec) return; const g=drawPart(name,cat,spec.draw); g.setAttribute('transform',`translate(${hole.getAttribute('cx')} ${hole.getAttribute('cy')})`); Gparts.appendChild(g);} else if(mode==='move'){ selected=pn||null;} else if(mode==='del'){ if(pn) pn.remove(); } });
-stage.addEventListener('mousemove',(e)=>{ if(mode!=='move'||!selected) return; const hole=e.target.closest('circle.hole'); if(hole) selected.setAttribute('transform',`translate(${hole.getAttribute('cx')} ${hole.getAttribute('cy')})`); });
-window.addEventListener('keydown',e=>{ if((e.key==='Backspace'||e.key==='Delete')&&selected){ selected.remove(); selected=null; }});
-function drawPart(name,cat,d){ const g=svgEl('g',{'data-part':name,'data-cat':cat}); if(!d) return g; if(d.type==='circle') g.appendChild(svgEl('circle',{r:d.r,fill:d.fill})); if(d.type==='rect') g.appendChild(svgEl('rect',{x:-d.w/2,y:-d.h/2,width:d.w,height:d.h,rx:d.rx||0,fill:d.fill})); return g; }
-function loadBgImage(force=false){ const key=document.getElementById('chassis').value; const info=CHASSIS_IMAGES[key]; if(!info) { bg.style.display='none'; return; } bg.onload=()=>{ bg.style.display='block'; }; bg.onerror=()=>{ bg.style.display='none'; if(force) alert('Immagine non raggiungibile. Incolla un URL valido dalla pagina Tamiya.'); }; bg.src=info.url; }
-
-/* ===== Catalogo render ===== */
-function renderCatalog(){ const box=document.getElementById('catList'); let html=''; for(const cat of Object.keys(CATALOG)){ html+=`<b>${cat}</b><br>`; for(const name of Object.keys(CATALOG[cat])){ const it=CATALOG[cat][name]; html+=`&nbsp;• ${name}${it.code?` <span class="muted">[ITEM ${it.code}]</span>`:''}<br>`; } html+='<br>'; } box.innerHTML=html; }
-
-/* ===== Boot ===== */
-function fillAll(){ fillSelectors(); renderBuilder(); loadBgImage(); renderCatalog(); }
-fillAll();
-document.querySelectorAll('.tab').forEach(t=>{ if(t.dataset.tab==='builder'){ t.addEventListener('click',()=>loadBgImage()); }});
+// Export to PDF (usa Stampa)
+document.getElementById('btn-print').onclick = ()=> window.print();
 </script>
 </body>
 </html>
