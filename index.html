@@ -1,62 +1,63 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mini4WD Advisor — FM-A Blueprint v2 (Top/Bottom + Zoom/Measure)</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mini4WD Advisor — FM-A Blueprint (realish v1)</title>
 <style>
 :root{
   --bg:#0b0f15; --panel:#121826; --ink:#e7ebf6; --mut:#9aa3b2;
-  --grid:#1c2435; --chassis:#94a3b8; --holes:#2e3a55;
-  --roller:#3aa0ff; --brake:#ff4d5a; --damper:#ffd166; --plate:#2b2f3a; --wheel:#cbd5e1; --hw:#c6cbd6;
+  --grid:#182235; --line:#8fa0b8; --fill:#0a1424; --holes:#314362;
+  --roller:#3aa0ff; --brake:#ff4757; --damper:#ffd166; --plate:#2b2f3a; --wheel:#cbd5e1; --hw:#c6cbd6;
 }
-*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto}
-header{padding:12px 16px;border-bottom:1px solid #1b2231;background:#0f1522;position:sticky;top:0;z-index:20}
-h1{font-size:16px;margin:0}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto}
+header{padding:12px 16px;border-bottom:1px solid #1c2333;background:#0f1522;position:sticky;top:0;z-index:20}
+h1{margin:0;font-size:16px}
 .wrap{display:grid;grid-template-columns:320px 1fr;gap:14px;padding:12px}
 @media (max-width:900px){.wrap{grid-template-columns:1fr}}
-.card{background:var(--panel);border:1px solid #1c2232;border-radius:14px;overflow:hidden}
-.card h2{margin:0;padding:10px 12px;font-size:14px;border-bottom:1px solid #1c2232;background:#0f1421}
+.card{background:var(--panel);border:1px solid #1b2231;border-radius:14px;overflow:hidden}
+.card h2{margin:0;padding:10px 12px;font-size:14px;border-bottom:1px solid #1b2231;background:#0f1522}
 .pad{padding:12px}
+.small{color:var(--mut);font-size:12px}
+.btn{background:#1a2032;border:1px solid #2a3046;color:#e7ebf6;padding:8px 10px;border-radius:10px;cursor:pointer}
+.btn.primary{background:#2b9cff;border-color:#2b9cff;color:#07121e}
+.badge{padding:2px 6px;border:1px solid #334155;border-radius:6px;background:#0b1320;color:#cbd5e1;font-size:12px}
 .ctrl{display:grid;gap:10px}
-.leg{display:flex;flex-wrap:wrap;gap:8px}
+.chk{display:flex;flex-wrap:wrap;gap:10px}
+.chk label{display:flex;align-items:center;gap:6px}
+.legend{display:flex;flex-wrap:wrap;gap:8px}
 .tag{display:inline-flex;align-items:center;gap:6px;background:#0e1421;border:1px solid #232b40;border-radius:999px;padding:4px 8px;color:var(--mut)}
 .dot{width:10px;height:10px;border-radius:50%}
 .dot.roller{background:var(--roller)} .dot.brake{background:var(--brake)} .dot.damper{background:var(--damper)}
 .dot.plate{background:var(--plate)} .dot.wheel{background:var(--wheel)} .dot.hw{background:var(--hw)}
-.chk{display:flex;flex-wrap:wrap;gap:10px}
-.chk label{display:flex;align-items:center;gap:6px}
-.btn{background:#1a2133;border:1px solid #2a3247;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
-.btn.primary{background:#2b9cff;border-color:#2b9cff;color:#05121e}
-.small{color:var(--mut);font-size:12px}
-.stage{position:relative;background:#0b111d;border:1px solid #1c2232;border-radius:14px;overflow:hidden}
-.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid #1c2232;background:#0f1522}
+.stage{position:relative;background:#0b111d;border:1px solid #1b2231;border-radius:14px;overflow:hidden}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid #1b2231;background:#0f1522}
 .stat{margin-left:auto;color:var(--mut);font-size:12px}
 svg{width:100%;height:auto;display:block;touch-action:none;user-select:none}
 .grid line{stroke:var(--grid);stroke-width:1;opacity:.45}
-.chassis{fill:#0c1524;stroke:var(--chassis);stroke-width:2}
+.chassis{fill:var(--fill);stroke:var(--line);stroke-width:2}
 .hole{fill:var(--holes)}
 .mk{cursor:pointer;stroke:#0005;stroke-width:.8;filter:drop-shadow(0 0 4px rgba(0,0,0,.4))}
 .mk.roller{fill:var(--roller)} .mk.brake{fill:var(--brake)} .mk.damper{fill:var(--damper)}
 .mk.plate{fill:var(--plate)} .mk.wheel{fill:var(--wheel)} .mk.hw{fill:var(--hw)}
-#tip{position:fixed;background:#0f1522;border:1px solid #2a3247;color:var(--ink);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:50;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#tip{position:fixed;background:#0f1522;border:1px solid #2a3046;color:#e7ebf6;padding:6px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:50;box-shadow:0 8px 28px rgba(0,0,0,.35)}
 #tip[hidden]{display:none}
-dialog{max-width:520px;width:92vw;background:#0b111d;border:1px solid #2a3247;border-radius:12px;color:var(--ink)}
+dialog{max-width:520px;width:92vw;background:#0b111d;border:1px solid #2a3046;border-radius:12px;color:#e7ebf6}
 dialog header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0f1522}
 dialog .pad{padding:12px}
 dialog img{width:100%;background:#0a0f18;border-radius:8px}
-.badge{padding:2px 6px;border-radius:6px;border:1px solid #334155;color:#cbd5e1;background:#0b1220;font-size:12px}
-hr{border:0;border-top:1px solid #1c2232;margin:12px 0}
 .ruler{stroke:#8b95a7;stroke-width:1.2;marker-end:url(#arr)}
 </style>
 </head>
 <body>
-<header><h1>Mini4WD Advisor — FM-A Blueprint v2</h1></header>
+<header><h1>Mini4WD Advisor — FM-A Blueprint (realish v1)</h1></header>
 
 <div class="wrap">
   <aside class="card">
     <h2>Controlli</h2>
     <div class="pad ctrl">
-      <div class="leg">
+      <div class="legend">
         <span class="tag"><span class="dot roller"></span> Roller</span>
         <span class="tag"><span class="dot brake"></span> Freni</span>
         <span class="tag"><span class="dot damper"></span> Damper</span>
@@ -77,42 +78,70 @@ hr{border:0;border-top:1px solid #1c2232;margin:12px 0}
         <label><input type="radio" name="view" value="bottom"> Bottom</label>
       </div>
       <button class="btn primary" id="print">Esporta PDF</button>
-      <div class="small">Suggerimento: Zoom con rotellina/pinch; trascina per spostare. Tocca un marker per scheda componente. Clicca due fori per misurare la distanza (mm).</div>
+      <div class="small">Zoom con rotellina/pinch, trascina per muovere. Clicca due fori per misurare (mm). Click marker → scheda componente (i codici saranno collegati al catalogo Tamiya).</div>
     </div>
   </aside>
 
   <section class="card stage">
     <div class="toolbar">
       <span class="badge" id="viewBadge">Top</span>
-      <span class="stat" id="stat">Zoom 100%% • Nessuna misura</span>
+      <span class="stat" id="stat">Zoom 100% • Nessuna misura</span>
     </div>
-    <svg id="scene" viewBox="0 0 1000 520" aria-label="FM-A blueprint interattivo">
+
+    <!-- SCENA -->
+    <svg id="scene" viewBox="0 0 1100 560" aria-label="FM-A blueprint interattivo">
       <defs>
         <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
           <path d="M0,0 L8,4 L0,8 z" fill="#8b95a7"/>
         </marker>
       </defs>
-      <!-- grid -->
+
+      <!-- Griglia -->
       <g class="grid" id="grid"></g>
 
-      <!-- CHASSIS (stilizzato, proporzioni leggibili) -->
-      <path id="chassis" class="chassis"
-        d="M120,60 L880,60 C908,60 930,82 930,110 L930,410 C930,438 908,460 880,460
-           L120,460 C92,460 70,438 70,410 L70,110 C70,82 92,60 120,60 Z
-           M160,120 L840,120 L840,400 L160,400 Z"/>
+      <!-- ======== Sagoma FM-A (realish) ======== -->
+      <!-- NB: sagoma disegnata per leggibilità; le quote absolute in mm verranno affinate con l'outline ufficiale -->
+      <path id="fma_outline" class="chassis" d="
+        M150,70
+        L950,70
+        C980,70 1000,90 1000,120
+        L1000,440
+        C1000,470 980,490 950,490
+        L150,490
+        C120,490 100,470 100,440
+        L100,120
+        C100,90 120,70 150,70
+        Z
+        M200,130
+        C200,115 215,110 230,110
+        L870,110
+        C885,110 900,115 900,130
+        L900,430
+        C900,445 885,450 870,450
+        L230,450
+        C215,450 200,445 200,430
+        Z" />
 
-      <!-- fori M2 (demo) -->
+      <!-- Vano motore/guscio (decorativo) -->
+      <path class="chassis" d="
+        M520,180
+        C560,170 620,170 660,180
+        L660,380
+        C620,390 560,390 520,380
+        Z" fill="none"/>
+
+      <!-- Fori (dataset) -->
       <g id="holes"></g>
 
-      <!-- markers -->
+      <!-- Layer marker -->
       <g id="layer-roller"></g>
-      <g id="layer-brake" style="display:none"></g>
+      <g id="layer-brake"></g>
       <g id="layer-damper"></g>
       <g id="layer-plate"></g>
       <g id="layer-wheel"></g>
-      <g id="layer-hw" style="display:none"></g>
+      <g id="layer-hw"></g>
 
-      <!-- misura -->
+      <!-- Misura -->
       <g id="measure"></g>
     </svg>
   </section>
@@ -129,126 +158,156 @@ hr{border:0;border-top:1px solid #1c2232;margin:12px 0}
     <div class="small"><b>Item No.</b> <span id="pcode">(da catalogo)</span></div>
     <hr>
     <div class="small"><b>Peso</b> <span id="pwt">—</span> • <b>Dimensioni</b> <span id="psz">—</span></div>
-    <div class="small" style="margin-top:8px;color:#93a1b5">Nota: in questa v2 i codici sono placeholder; la build collegata al catalogo Tamiya li mostrerà reali con foto ufficiale.</div>
+    <div class="small" style="margin-top:8px;color:#93a1b5">In questa build i codici sono placeholder; nella prossima li prelevo dal catalogo ufficiale Tamiya.</div>
   </div>
 </dialog>
 
 <script>
-/* ====== Config scala (px -> mm) ======
-   Imposto 1 px = 0.25 mm (comodo per misure a schermo)
+/* =================== Scala millimetrica ===================
+   Larghezza scena 1100 px ~ 270 mm (scala comoda per misure)
+   => 1 px ≈ 0.245 mm (regolabile senza ridisegnare l'SVG)
 */
-const MM_PER_PX = 0.25;
+const MM_PER_PX = 0.245;
 
-/* ====== Griglia ====== */
+/* =================== Griglia =================== */
 const grid = document.getElementById('grid');
-for(let x=0; x<=1000; x+=50){
+for(let x=0; x<=1100; x+=50){
   const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-  ln.setAttribute('x1',x); ln.setAttribute('y1',0); ln.setAttribute('x2',x); ln.setAttribute('y2',520);
+  ln.setAttribute('x1',x); ln.setAttribute('y1',0);
+  ln.setAttribute('x2',x); ln.setAttribute('y2',560);
   grid.appendChild(ln);
 }
-for(let y=0; y<=520; y+=50){
+for(let y=0; y<=560; y+=50){
   const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-  ln.setAttribute('x1',0); ln.setAttribute('y1',y); ln.setAttribute('x2',1000); ln.setAttribute('y2',y);
+  ln.setAttribute('x1',0); ln.setAttribute('y1',y);
+  ln.setAttribute('x2',1100); ln.setAttribute('y2',y);
   grid.appendChild(ln);
 }
 
-/* ====== Fori demo ====== */
+/* =================== Fori FM-A (mappa realish)
+   NOTA: coordinate in px pensate per stare dove il telaio li ha davvero.
+   Verranno rifinite con l'outline ufficiale (stesso sistema).
+*/
 const holesG = document.getElementById('holes');
-const HOLES=[];
-for(let ry=0, y=140; y<=380; y+=70, ry++){
-  for(let cx=0, x=200; x<=800; x+=80, cx++){
-    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    c.setAttribute('class','hole'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',3.5);
-    c.dataset.idx = `${ry}-${cx}`; // indice per misure
-    holesG.appendChild(c);
-    HOLES.push(c);
-  }
+const HOLES = [];
+const HOLE_POS = [
+  // Front bumper rows (sx->dx)
+  [220,120],[260,120],[300,120],[340,120],[380,120],[420,120],[460,120],[500,120],[540,120],[580,120],[620,120],[660,120],[700,120],[740,120],[780,120],[820,120],
+  // Seconda fila front
+  [230,145],[270,145],[310,145],[350,145],[390,145],[430,145],[470,145],[510,145],[550,145],[590,145],[630,145],[670,145],[710,145],[750,145],[790,145],
+  // Centro piastre laterali (qualche foro service)
+  [310,250],[790,250],[550,210],[550,290],
+  // Rear bumper due file
+  [230,440],[270,440],[310,440],[350,440],[390,440],[430,440],[470,440],[510,440],[550,440],[590,440],[630,440],[670,440],[710,440],[750,440],[790,440],
+  [220,415],[260,415],[300,415],[340,415],[380,415],[420,415],[460,415],[500,415],[540,415],[580,415],[620,415],[660,415],[700,415],[740,415],[780,415],[820,415],
+];
+for(const [x,y] of HOLE_POS){
+  const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+  c.setAttribute('class','hole'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',3.6);
+  holesG.appendChild(c); HOLES.push(c);
 }
 
-/* ====== Marker helper ====== */
+/* =================== Marker helper =================== */
 function mk(type, attrs){
   const el = document.createElementNS('http://www.w3.org/2000/svg', type);
   Object.entries(attrs).forEach(([k,v])=> el.setAttribute(k,v));
-  el.classList.add('mk', attrs.className);
+  el.classList.add('mk', attrs.className); return el;
+}
+function placeOnHole(ix,iy,opts){
+  // trova buco più vicino a (ix,iy)
+  let best=null,bd=1e9;
+  for(const h of HOLES){
+    const dx=h.cx.baseVal.value-ix, dy=h.cy.baseVal.value-iy, d=dx*dx+dy*dy;
+    if(d<bd){bd=d; best=h;}
+  }
+  const el = mk(opts.type||'circle', Object.assign({
+    cx:best.cx.baseVal.value, cy:best.cy.baseVal.value, r:opts.r||10, className:opts.className||'roller'
+  }, opts.attrs||{}));
   return el;
 }
-function add(topOrBottom){
-  // Pulizia
-  ['layer-roller','layer-brake','layer-damper','layer-plate','layer-wheel','layer-hw'].forEach(id=>{
-    document.getElementById(id).innerHTML='';
-  });
 
-  // Top
-  if(topOrBottom==='top'){
-    const Lr = document.getElementById('layer-roller');
-    Lr.appendChild(mk('circle',{className:'roller', cx:210, cy:120, r:12,
-      'data-name':'Roller 19mm (front over)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top','data-weight':'— g','data-size':'Ø19 mm'}));
-    Lr.appendChild(mk('circle',{className:'roller', cx:790, cy:120, r:12,
-      'data-name':'Roller 19mm (front over)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
-    Lr.appendChild(mk('circle',{className:'roller', cx:230, cy:400, r:10,
-      'data-name':'Roller 13mm (rear under)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
-    Lr.appendChild(mk('circle',{className:'roller', cx:770, cy:400, r:10,
-      'data-name':'Roller 13mm (rear under)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
+/* =================== Popola marker Top/Bottom =================== */
+const L = {
+  roller: document.getElementById('layer-roller'),
+  brake:  document.getElementById('layer-brake'),
+  damper: document.getElementById('layer-damper'),
+  plate:  document.getElementById('layer-plate'),
+  wheel:  document.getElementById('layer-wheel'),
+  hw:     document.getElementById('layer-hw'),
+};
+function clearLayers(){ Object.values(L).forEach(g=> g.innerHTML=''); }
 
-    const Ld = document.getElementById('layer-damper');
-    Ld.appendChild(mk('rect',{className:'damper', x:470, y:360, width:60, height:20, rx:4,
-      'data-name':'Mass Damper Block 12g','data-part':'(da catalogo)','data-cat':'damper','data-view':'Top','data-weight':'12 g'}));
-
-    const Lw = document.getElementById('layer-wheel');
-    Lw.appendChild(mk('circle',{className:'wheel', cx:260, cy:260, r:28,'data-name':'Wheel/Tire 26mm','data-cat':'wheel','data-view':'Top'}));
-    Lw.appendChild(mk('circle',{className:'wheel', cx:740, cy:260, r:28,'data-name':'Wheel/Tire 26mm','data-cat':'wheel','data-view':'Top'}));
-
-    const Lp = document.getElementById('layer-plate');
-    Lp.appendChild(mk('rect',{className:'plate', x:170, y:90, width:660, height:22, rx:4,
-      'data-name':'Front FRP Stay','data-cat':'plate','data-view':'Top'}));
-    Lp.appendChild(mk('rect',{className:'plate', x:190, y:390, width:620, height:18, rx:4,
-      'data-name':'Rear Multi Roller FRP','data-cat':'plate','data-view':'Top'}));
-  } else { // Bottom
-    document.getElementById('layer-brake').style.display='';
-    const Lb = document.getElementById('layer-brake');
-    Lb.appendChild(mk('rect',{className:'brake', x:420, y:410, width:160, height:12, rx:2,
-      'data-name':'Brake Sponge 2.5mm','data-cat':'brake','data-view':'Bottom','data-size':'spessore 2.5 mm'}));
-    const Lp = document.getElementById('layer-plate');
-    Lp.appendChild(mk('rect',{className:'plate', x:430, y:430, width:140, height:12, rx:3,
-      'data-name':'Under Guard','data-cat':'plate','data-view':'Bottom'}));
-    const Lh = document.getElementById('layer-hw');
-    Lh.style.display='';
-    Lh.appendChild(mk('rect',{className:'hw', x:220, y:392, width:4, height:30, 'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}));
-    Lh.appendChild(mk('rect',{className:'hw', x:776, y:392, width:4, height:30, 'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}));
-  }
+function loadTop(){
+  clearLayers();
+  // Front rollers ON TOP (over plate)
+  L.roller.appendChild(placeOnHole(220,120,{
+    className:'roller', attrs:{'data-name':'Roller 19 mm — front SX (over)','data-cat':'roller','data-view':'Top','data-part':'(Tamiya Item No.)','data-size':'Ø19 mm'}
+  }));
+  L.roller.appendChild(placeOnHole(820,120,{
+    className:'roller', attrs:{'data-name':'Roller 19 mm — front DX (over)','data-cat':'roller','data-view':'Top','data-part':'(Tamiya Item No.)','data-size':'Ø19 mm'}
+  }));
+  // Rear rollers UNDER
+  L.roller.appendChild(placeOnHole(230,440,{
+    className:'roller', attrs:{'data-name':'Roller 13 mm — rear SX (under)','data-cat':'roller','data-view':'Top','data-size':'Ø13 mm'}
+  }));
+  L.roller.appendChild(placeOnHole(790,440,{
+    className:'roller', attrs:{'data-name':'Roller 13 mm — rear DX (under)','data-cat':'roller','data-view':'Top','data-size':'Ø13 mm'}
+  }));
+  // Plates (front/rear stays)
+  L.plate.appendChild(mk('rect',{className:'plate', x:210, y:108, width:620, height:18, rx:4,
+    'data-name':'Front FRP Stay','data-cat':'plate','data-view':'Top'}));
+  L.plate.appendChild(mk('rect',{className:'plate', x:210, y:428, width:620, height:18, rx:4,
+    'data-name':'Rear FRP Stay','data-cat':'plate','data-view':'Top'}));
+  // Damper centrale
+  L.damper.appendChild(mk('rect',{className:'damper', x:518, y:360, width:64, height:20, rx:4,
+    'data-name':'Mass Damper Block 12 g','data-cat':'damper','data-view':'Top','data-weight':'12 g'}));
+  // Wheels (indicative)
+  L.wheel.appendChild(mk('circle',{className:'wheel', cx:300, cy:265, r:28,'data-name':'Wheel/Tire 26 mm','data-cat':'wheel','data-view':'Top'}));
+  L.wheel.appendChild(mk('circle',{className:'wheel', cx:800, cy:265, r:28,'data-name':'Wheel/Tire 26 mm','data-cat':'wheel','data-view':'Top'}));
 }
-add('top');
 
-/* ====== Toggle viste e layer ====== */
+function loadBottom(){
+  clearLayers();
+  // Brake sponge rear underside
+  L.brake.appendChild(mk('rect',{className:'brake', x:430, y:442, width:240, height:10, rx:2,
+    'data-name':'Brake sponge 2.5 mm','data-cat':'brake','data-view':'Bottom','data-size':'spessore 2.5 mm'}));
+  // Under guard
+  L.plate.appendChild(mk('rect',{className:'plate', x:460, y:420, width:180, height:12, rx:3,
+    'data-name':'Under Guard','data-cat':'plate','data-view':'Bottom'}));
+  // Hardware (vite) ancorate ai fori estremi rear
+  const hSX = placeOnHole(220,415,{type:'rect', className:'hw', r:0, attrs:{x:219, y:396, width:3, height:30,'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}});
+  const hDX = placeOnHole(820,415,{type:'rect', className:'hw', r:0, attrs:{x:819, y:396, width:3, height:30,'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}});
+  L.hw.appendChild(hSX); L.hw.appendChild(hDX);
+}
+
+loadTop();
+
+/* =================== Toggle viste/layer =================== */
 const viewBadge=document.getElementById('viewBadge');
 document.querySelectorAll('input[name=view]').forEach(r=>{
   r.addEventListener('change',()=>{
     const v=r.value; viewBadge.textContent=v[0].toUpperCase()+v.slice(1);
-    // mostra/nascondi layer bottom-specific
-    document.getElementById('layer-brake').style.display = (v==='bottom')? '' : 'none';
-    document.getElementById('layer-hw').style.display = (v==='bottom')? '' : 'none';
-    add(v);
+    if(v==='top') loadTop(); else loadBottom();
   });
 });
 document.querySelectorAll('.lay').forEach(cb=>{
   cb.addEventListener('change',()=>{
-    const id='layer-'+cb.dataset.layer;
-    const g=document.getElementById(id);
+    const g=document.getElementById('layer-'+cb.dataset.layer);
     g.style.display = cb.checked? '' : 'none';
   });
 });
 
-/* ====== Zoom/Pan ====== */
+/* =================== Zoom/Pan =================== */
 const svg=document.getElementById('scene'), stat=document.getElementById('stat');
-let zoom=1, panX=0, panY=0, dragging=false, last={x:0,y:0};
-function applyView(){ svg.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; stat.textContent=`Zoom ${Math.round(zoom*100)}% • ${measureText}`}
+let zoom=1, panX=0, panY=0, dragging=false, last={x:0,y:0}, measureText='Nessuna misura';
 svg.style.transformOrigin='0 0';
-svg.addEventListener('wheel',e=>{ e.preventDefault(); const k=Math.exp(-e.deltaY*0.0015); zoom=Math.min(3,Math.max(.6,zoom*k)); applyView();},{passive:false});
-svg.addEventListener('pointerdown',e=>{ dragging=true; last={x:e.clientX,y:e.clientY}; svg.setPointerCapture(e.pointerId);});
+function applyView(){ svg.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; stat.textContent=`Zoom ${Math.round(zoom*100)}% • ${measureText}` }
+svg.addEventListener('wheel',e=>{ e.preventDefault(); const k=Math.exp(-e.deltaY*0.0015); zoom=Math.min(3,Math.max(.6,zoom*k)); applyView(); },{passive:false});
+svg.addEventListener('pointerdown',e=>{ if(e.button!==0){return} dragging=true; last={x:e.clientX,y:e.clientY}; svg.setPointerCapture(e.pointerId);});
 svg.addEventListener('pointermove',e=>{ if(!dragging)return; panX+=e.clientX-last.x; panY+=e.clientY-last.y; last={x:e.clientX,y:e.clientY}; applyView();});
-svg.addEventListener('pointerup',e=>{ dragging=false; svg.releasePointerCapture(e.pointerId)});
+svg.addEventListener('pointerup',e=>{ dragging=false; try{svg.releasePointerCapture(e.pointerId)}catch{}});
 
-/* ====== Tooltip + Modal ====== */
+/* =================== Tooltip + Modal =================== */
 const tip=document.getElementById('tip'), dlg=document.getElementById('sheet');
 const pimg=document.getElementById('pimg'), pcat=document.getElementById('pcat'), pview=document.getElementById('pview'),
       pname=document.getElementById('pname'), pcode=document.getElementById('pcode'), pwt=document.getElementById('pwt'), psz=document.getElementById('psz');
@@ -265,39 +324,34 @@ svg.addEventListener('click',e=>{
   pcat.textContent=(t.dataset.cat||'').toUpperCase(); pview.textContent=t.dataset.view||'-';
   pname.textContent=t.dataset.name||'-'; pcode.textContent=t.dataset.part||'(da catalogo)';
   pwt.textContent=t.dataset.weight||'—'; psz.textContent=t.dataset.size||'—';
-  const ph=`<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'>
-    <rect width='100%%' height='100%%' fill='#0a0f18'/><text x='50%%' y='50%%' text-anchor='middle' dominant-baseline='middle'
-     font-size='40' fill='#2b9cff' font-family='system-ui,Segoe UI,Roboto'>Foto componente (demo)</text></svg>`;
+  // placeholder image
+  const ph=`<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'><rect width='100%%' height='100%%' fill='#0a0f18'/><text x='50%%' y='50%%' text-anchor='middle' dominant-baseline='middle' font-size='40' fill='#2b9cff' font-family='system-ui,Segoe UI,Roboto'>Foto componente (demo)</text></svg>`;
   pimg.src='data:image/svg+xml;utf8,'+encodeURIComponent(ph);
   dlg.showModal();
 });
 document.getElementById('close').onclick=()=>dlg.close();
 
-/* ====== Misuratore (click su due fori) ====== */
+/* =================== Misuratore (due fori) =================== */
 const mG=document.getElementById('measure'); let mSel=[];
-let measureText='Nessuna misura';
 svg.addEventListener('click',e=>{
   if(e.target.classList && e.target.classList.contains('hole')){
-    mSel.push(e.target); if(mSel.length>2) mSel=[e.target];
-    drawMeasure();
+    mSel.push(e.target); if(mSel.length>2) mSel=[e.target]; drawMeasure();
   }
 });
 function drawMeasure(){
   mG.innerHTML=''; if(mSel.length<2){ measureText='Nessuna misura'; applyView(); return; }
   const [a,b]=mSel, ax=a.cx.baseVal.value, ay=a.cy.baseVal.value, bx=b.cx.baseVal.value, by=b.cy.baseVal.value;
-  const dx=bx-ax, dy=by-ay, px=Math.hypot(dx,dy), mm=(px*MM_PER_PX).toFixed(1);
+  const px=Math.hypot(bx-ax, by-ay), mm=(px*MM_PER_PX).toFixed(2);
   const l=document.createElementNS('http://www.w3.org/2000/svg','line');
   l.setAttribute('x1',ax); l.setAttribute('y1',ay); l.setAttribute('x2',bx); l.setAttribute('y2',by); l.setAttribute('class','ruler');
   mG.appendChild(l);
   const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
   txt.setAttribute('x',(ax+bx)/2); txt.setAttribute('y',(ay+by)/2-6); txt.setAttribute('fill','#cbd5e1'); txt.setAttribute('font-size','12');
-  txt.setAttribute('text-anchor','middle'); txt.textContent=`${mm} mm`;
-  mG.appendChild(txt);
-  measureText=`Distanza ${mm} mm`;
-  applyView();
+  txt.setAttribute('text-anchor','middle'); txt.textContent=`${mm} mm`; mG.appendChild(txt);
+  measureText=`Distanza ${mm} mm`; applyView();
 }
 
-/* ====== Stampa ====== */
+/* =================== Stampa =================== */
 document.getElementById('print').onclick=()=>window.print();
 </script>
 </body>
