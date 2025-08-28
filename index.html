@@ -1,373 +1,304 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Mini4WD Advisor — FM-A Blueprint (Top+Bottom Demo)</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mini4WD Advisor — FM-A Blueprint v2 (Top/Bottom + Zoom/Measure)</title>
 <style>
-  :root{
-    --bg:#0f1115; --panel:#141823; --ink:#e6e9f2; --muted:#9aa3b2;
-    --grid:#22283a; --chassis:#6e7691; --glow:#2b9cff;
-    --roller:#3aa0ff; --brake:#ff4655; --damper:#ffd166; --plate:#2b2f3a; --wheel:#9aa3b2; --hw:#c6cbd6;
-  }
-  html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;}
-  header{padding:12px 16px;border-bottom:1px solid #1f2433;background:linear-gradient(180deg,#151a28,#0f1115 60%);position:sticky;top:0;z-index:50}
-  h1{font-size:16px;margin:0}
-  .sub{color:var(--muted);font-size:12px}
-  .wrap{display:grid;grid-template-columns:320px 1fr;gap:16px;padding:12px 16px}
-  @media (max-width:900px){.wrap{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid #23283a;border-radius:14px;overflow:hidden}
-  .card h2{font-size:14px;margin:0;padding:10px 12px;border-bottom:1px solid #23283a;background:#121624}
-  .pad{padding:12px}
-  .legend{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
-  .tag{display:inline-flex;align-items:center;gap:6px;background:#111522;border:1px solid #252b3d;border-radius:999px;padding:4px 8px;color:var(--muted)}
-  .dot{width:10px;height:10px;border-radius:50%}
-  .roller{background:var(--roller)} .brake{background:var(--brake)} .damper{background:var(--damper)}
-  .plate{background:var(--plate)} .wheel{background:var(--wheel)} .hw{background:var(--hw)}
-  .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .toolbar input[type="search"]{width:100%;max-width:230px;background:#0f1320;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;outline:none}
-  .toolbar .btn{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
-  .toolbar .btn.primary{background:#2b9cff;border-color:#2b9cff;color:#08121e}
-  .toggle{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
-  .toggle button{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:6px 10px;border-radius:10px;cursor:pointer}
-  .toggle button.active{background:#2b9cff;color:#06111e;border-color:#2b9cff}
-  /* Canvas */
-  .stage{background:radial-gradient(1200px 600px at 50% -10%, #151a28 0%, #0f1115 60%);border:1px solid #23283a;border-radius:14px;position:relative;overflow:hidden}
-  svg{width:100%;height:auto;display:block}
-  .grid line{stroke:var(--grid);stroke-width:1;opacity:0.4}
-  .chassis{fill:none;stroke:var(--chassis);stroke-width:1.6;filter: drop-shadow(0 0 2px rgba(0,0,0,.6))}
-  .hole{fill:#2a3045;stroke:#3a4259;stroke-width:1}
-  .mk{cursor:pointer;filter: drop-shadow(0 0 6px rgba(0,0,0,.7))}
-  .mk.roller{fill:var(--roller)} .mk.brake{fill:var(--brake)} .mk.damper{fill:var(--damper)}
-  .mk.plate{fill:var(--plate)} .mk.wheel{fill:var(--wheel)} .mk.hw{fill:var(--hw)}
-  .mk.locked{stroke:#ef4444;stroke-width:2}
-  /* Tooltip */
-  #tip{position:fixed;transform:translate3d(var(--x,0),var(--y,0),0);background:#101423;border:1px solid #2a3045;color:var(--ink);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:100;box-shadow:0 6px 28px rgba(0,0,0,.35)}
-  #tip[hidden]{display:none}
-  /* Modal */
-  dialog{max-width:480px;width:92vw;background:#0f1115;border:1px solid #2a3045;border-radius:14px;color:var(--ink);box-shadow:0 30px 80px rgba(0,0,0,.5)}
-  dialog header{display:flex;align-items:center;justify-content:space-between;border:0;padding:12px 14px;background:transparent}
-  dialog .pad{padding:0 14px 14px}
-  dialog img{width:100%;height:auto;border-radius:10px;background:#0a0d16}
-  .muted{color:var(--muted)}
-  .row{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-  .row > div{flex:1 1 160px}
-  .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
-  .actions button{background:#1a2031;border:1px solid #2a3045;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
-  .actions .primary{background:#2b9cff;border-color:#2b9cff;color:#06111e}
-  .small{font-size:12px}
+:root{
+  --bg:#0b0f15; --panel:#121826; --ink:#e7ebf6; --mut:#9aa3b2;
+  --grid:#1c2435; --chassis:#94a3b8; --holes:#2e3a55;
+  --roller:#3aa0ff; --brake:#ff4d5a; --damper:#ffd166; --plate:#2b2f3a; --wheel:#cbd5e1; --hw:#c6cbd6;
+}
+*{box-sizing:border-box} html,body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto}
+header{padding:12px 16px;border-bottom:1px solid #1b2231;background:#0f1522;position:sticky;top:0;z-index:20}
+h1{font-size:16px;margin:0}
+.wrap{display:grid;grid-template-columns:320px 1fr;gap:14px;padding:12px}
+@media (max-width:900px){.wrap{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid #1c2232;border-radius:14px;overflow:hidden}
+.card h2{margin:0;padding:10px 12px;font-size:14px;border-bottom:1px solid #1c2232;background:#0f1421}
+.pad{padding:12px}
+.ctrl{display:grid;gap:10px}
+.leg{display:flex;flex-wrap:wrap;gap:8px}
+.tag{display:inline-flex;align-items:center;gap:6px;background:#0e1421;border:1px solid #232b40;border-radius:999px;padding:4px 8px;color:var(--mut)}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.roller{background:var(--roller)} .dot.brake{background:var(--brake)} .dot.damper{background:var(--damper)}
+.dot.plate{background:var(--plate)} .dot.wheel{background:var(--wheel)} .dot.hw{background:var(--hw)}
+.chk{display:flex;flex-wrap:wrap;gap:10px}
+.chk label{display:flex;align-items:center;gap:6px}
+.btn{background:#1a2133;border:1px solid #2a3247;color:var(--ink);padding:8px 10px;border-radius:10px;cursor:pointer}
+.btn.primary{background:#2b9cff;border-color:#2b9cff;color:#05121e}
+.small{color:var(--mut);font-size:12px}
+.stage{position:relative;background:#0b111d;border:1px solid #1c2232;border-radius:14px;overflow:hidden}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-bottom:1px solid #1c2232;background:#0f1522}
+.stat{margin-left:auto;color:var(--mut);font-size:12px}
+svg{width:100%;height:auto;display:block;touch-action:none;user-select:none}
+.grid line{stroke:var(--grid);stroke-width:1;opacity:.45}
+.chassis{fill:#0c1524;stroke:var(--chassis);stroke-width:2}
+.hole{fill:var(--holes)}
+.mk{cursor:pointer;stroke:#0005;stroke-width:.8;filter:drop-shadow(0 0 4px rgba(0,0,0,.4))}
+.mk.roller{fill:var(--roller)} .mk.brake{fill:var(--brake)} .mk.damper{fill:var(--damper)}
+.mk.plate{fill:var(--plate)} .mk.wheel{fill:var(--wheel)} .mk.hw{fill:var(--hw)}
+#tip{position:fixed;background:#0f1522;border:1px solid #2a3247;color:var(--ink);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:nowrap;z-index:50;box-shadow:0 8px 28px rgba(0,0,0,.35)}
+#tip[hidden]{display:none}
+dialog{max-width:520px;width:92vw;background:#0b111d;border:1px solid #2a3247;border-radius:12px;color:var(--ink)}
+dialog header{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:#0f1522}
+dialog .pad{padding:12px}
+dialog img{width:100%;background:#0a0f18;border-radius:8px}
+.badge{padding:2px 6px;border-radius:6px;border:1px solid #334155;color:#cbd5e1;background:#0b1220;font-size:12px}
+hr{border:0;border-top:1px solid #1c2232;margin:12px 0}
+.ruler{stroke:#8b95a7;stroke-width:1.2;marker-end:url(#arr)}
 </style>
 </head>
 <body>
-  <header>
-    <h1>Mini4WD Advisor — FM-A Blueprint (Top+Bottom Demo)</h1>
-    <div class="sub">Layout pulito con marker interattivi (hover/click). I codici Item No. saranno sincronizzati con il catalogo ufficiale Tamiya.</div>
-  </header>
+<header><h1>Mini4WD Advisor — FM-A Blueprint v2</h1></header>
 
-  <div class="wrap">
-    <aside class="card">
-      <h2>Catalogo &amp; Controlli</h2>
-      <div class="pad">
-        <div class="toolbar">
-          <input id="q" type="search" placeholder="Cerca Item No. o nome (es. 'roller 19mm')" aria-label="Cerca nel catalogo">
-          <button class="btn" id="btn-search">Cerca</button>
-          <button class="btn" id="btn-clear">Pulisci</button>
-          <button class="btn primary" id="btn-print">Esporta PDF</button>
-        </div>
-
-        <div class="legend">
-          <span class="tag"><span class="dot roller"></span> Roller</span>
-          <span class="tag"><span class="dot brake"></span> Freni</span>
-          <span class="tag"><span class="dot damper"></span> Damper/Pesi</span>
-          <span class="tag"><span class="dot plate"></span> Piastre/Stay</span>
-          <span class="tag"><span class="dot wheel"></span> Gomme/Ruote</span>
-          <span class="tag"><span class="dot hw"></span> Ferramenta</span>
-        </div>
-
-        <div class="toggle" role="tablist" aria-label="Selettore Vista">
-          <button class="active" data-view="top" role="tab" aria-selected="true">Top</button>
-          <button data-view="bottom" role="tab" aria-selected="false">Bottom</button>
-        </div>
-
-        <div class="pad small muted">
-          Suggerimento: tocca un marker per aprire la scheda del componente (foto, Item No., peso, dimensioni). Su mobile: tap → tooltip, secondo tap → scheda.
-        </div>
-
-        <div id="results" class="pad small"></div>
+<div class="wrap">
+  <aside class="card">
+    <h2>Controlli</h2>
+    <div class="pad ctrl">
+      <div class="leg">
+        <span class="tag"><span class="dot roller"></span> Roller</span>
+        <span class="tag"><span class="dot brake"></span> Freni</span>
+        <span class="tag"><span class="dot damper"></span> Damper</span>
+        <span class="tag"><span class="dot plate"></span> Piastre</span>
+        <span class="tag"><span class="dot wheel"></span> Gomme</span>
+        <span class="tag"><span class="dot hw"></span> Ferramenta</span>
       </div>
-    </aside>
-
-    <main class="card stage">
-      <h2>Blueprint FM-A</h2>
-      <div class="pad" style="padding:0">
-        <!-- SVG STAGE -->
-        <svg id="stage" viewBox="0 0 1000 520" aria-labelledby="title desc" role="img">
-          <title id="title">Blueprint FM-A Demo</title>
-          <desc id="desc">Vista Top o Bottom con marker interattivi.</desc>
-
-          <!-- Grid -->
-          <g class="grid" opacity="0.35">
-            <g id="gridV"></g>
-            <g id="gridH"></g>
-          </g>
-
-          <!-- Chassis contour (stylized FM-A) -->
-          <path id="fm-a" class="chassis" d="
-            M120,60 L880,60 C910,60 930,80 930,110 L930,410 C930,440 910,460 880,460
-            L120,460 C90,460 70,440 70,410 L70,110 C70,80 90,60 120,60 Z
-            M160,120 L840,120 L840,400 L160,400 Z" />
-
-          <!-- Mounting holes (demo grid of M2 points) -->
-          <g id="holes"></g>
-
-          <!-- MARKERS (Top view default) -->
-          <g id="markers-top">
-            <!-- Front rollers (over plate) -->
-            <circle class="mk roller" cx="210" cy="120" r="10"
-              data-name="Roller 19 mm AL (front over)"
-              data-part="(da catalogo)"
-              data-cat="roller" data-view="Top"
-              data-weight="— g" data-size="Ø19 mm"
-              data-img="placeholder"></circle>
-
-            <circle class="mk roller" cx="790" cy="120" r="10"
-              data-name="Roller 19 mm AL (front over)"
-              data-part="(da catalogo)"
-              data-cat="roller" data-view="Top"
-              data-weight="— g" data-size="Ø19 mm"
-              data-img="placeholder"></circle>
-
-            <!-- Rear rollers (under plate) -->
-            <circle class="mk roller" cx="230" cy="400" r="8"
-              data-name="Roller 13 mm AL (rear under)"
-              data-part="(da catalogo)"
-              data-cat="roller" data-view="Top"
-              data-weight="— g" data-size="Ø13 mm"
-              data-img="placeholder"></circle>
-
-            <circle class="mk roller" cx="770" cy="400" r="8"
-              data-name="Roller 13 mm AL (rear under)"
-              data-part="(da catalogo)"
-              data-cat="roller" data-view="Top"
-              data-weight="— g" data-size="Ø13 mm"
-              data-img="placeholder"></circle>
-
-            <!-- Damper block -->
-            <rect class="mk damper" x="470" y="360" width="60" height="18" rx="4"
-              data-name="Mass Damper Block (12 g)"
-              data-part="(da catalogo)"
-              data-cat="damper" data-view="Top"
-              data-weight="12 g" data-size="—"
-              data-img="placeholder"></rect>
-
-            <!-- Wheels (for reference) -->
-            <circle class="mk wheel" cx="260" cy="260" r="26"
-              data-name="Wheel/Tire 26 mm LP"
-              data-part="(da catalogo)"
-              data-cat="wheel" data-view="Top"
-              data-weight="— g" data-size="Ø26 mm"
-              data-img="placeholder"></circle>
-
-            <circle class="mk wheel" cx="740" cy="260" r="26"
-              data-name="Wheel/Tire 26 mm LP"
-              data-part="(da catalogo)"
-              data-cat="wheel" data-view="Top"
-              data-weight="— g" data-size="Ø26 mm"
-              data-img="placeholder"></circle>
-
-            <!-- Front & rear plates (generic position) -->
-            <rect class="mk plate" x="170" y="90" width="660" height="20" rx="4"
-              data-name="Front FRP Stay"
-              data-part="(da catalogo)"
-              data-cat="plate" data-view="Top"
-              data-weight="— g" data-size="—"
-              data-img="placeholder"></rect>
-
-            <rect class="mk plate" x="190" y="390" width="620" height="16" rx="4"
-              data-name="Rear Multi Roller FRP"
-              data-part="(da catalogo)"
-              data-cat="plate" data-view="Top"
-              data-weight="— g" data-size="—"
-              data-img="placeholder"></rect>
-          </g>
-
-          <!-- MARKERS (Bottom view, hidden by default) -->
-          <g id="markers-bottom" style="display:none">
-            <!-- Brake sponge (rear underside) -->
-            <rect class="mk brake" x="420" y="410" width="160" height="10" rx="2"
-              data-name="Brake Sponge (2.5 mm)"
-              data-part="(da catalogo)"
-              data-cat="brake" data-view="Bottom"
-              data-weight="— g" data-size="spessore 2.5 mm, clearance 1.3 mm"
-              data-img="placeholder"></rect>
-
-            <!-- Under guard -->
-            <rect class="mk plate" x="430" y="430" width="140" height="12" rx="3"
-              data-name="Under Guard"
-              data-part="(da catalogo)"
-              data-cat="plate" data-view="Bottom"
-              data-weight="— g" data-size="—"
-              data-img="placeholder"></rect>
-
-            <!-- Hardware (screws) -->
-            <rect class="mk hw" x="220" y="392" width="4" height="30"
-              data-name="Vite M2 2×25"
-              data-part="(da catalogo)"
-              data-cat="hardware" data-view="Bottom"
-              data-weight="— g" data-size="2×25 mm"
-              data-img="placeholder"></rect>
-
-            <rect class="mk hw" x="776" y="392" width="4" height="30"
-              data-name="Vite M2 2×25"
-              data-part="(da catalogo)"
-              data-cat="hardware" data-view="Bottom"
-              data-weight="— g" data-size="2×25 mm"
-              data-img="placeholder"></rect>
-          </g>
-        </svg>
+      <div class="chk">
+        <label><input type="checkbox" class="lay" data-layer="roller" checked> Roller</label>
+        <label><input type="checkbox" class="lay" data-layer="brake" checked> Freni</label>
+        <label><input type="checkbox" class="lay" data-layer="damper" checked> Damper</label>
+        <label><input type="checkbox" class="lay" data-layer="plate" checked> Piastre</label>
+        <label><input type="checkbox" class="lay" data-layer="wheel" checked> Gomme</label>
+        <label><input type="checkbox" class="lay" data-layer="hw" checked> Ferramenta</label>
       </div>
-    </main>
-  </div>
-
-  <!-- Tooltip -->
-  <div id="tip" hidden></div>
-
-  <!-- Modal scheda componente -->
-  <dialog id="sheet" aria-labelledby="sh1">
-    <header>
-      <strong id="sh1">Scheda componente</strong>
-      <button class="actions btn" id="close">Chiudi</button>
-    </header>
-    <div class="pad">
-      <img id="pimg" alt="Foto componente" />
-      <div class="row">
-        <div><div class="muted small">Nome</div><div id="pname">—</div></div>
-        <div><div class="muted small">Item No.</div><div id="pcode">(da catalogo)</div></div>
+      <div class="chk">
+        <label><input type="radio" name="view" value="top" checked> Top</label>
+        <label><input type="radio" name="view" value="bottom"> Bottom</label>
       </div>
-      <div class="row">
-        <div><div class="muted small">Categoria</div><div id="pcat">—</div></div>
-        <div><div class="muted small">Vista</div><div id="pview">—</div></div>
-      </div>
-      <div class="row">
-        <div><div class="muted small">Peso</div><div id="pwt">—</div></div>
-        <div><div class="muted small">Dimensioni</div><div id="psz">—</div></div>
-      </div>
-      <div class="actions">
-        <button class="primary" id="add">Aggiungi al setup</button>
-      </div>
-      <div class="small muted">Nota: i codici sono placeholder in questa demo offline. La versione collegata al catalogo Tamiya mostrerà foto e Item No. ufficiali.</div>
+      <button class="btn primary" id="print">Esporta PDF</button>
+      <div class="small">Suggerimento: Zoom con rotellina/pinch; trascina per spostare. Tocca un marker per scheda componente. Clicca due fori per misurare la distanza (mm).</div>
     </div>
-  </dialog>
+  </aside>
+
+  <section class="card stage">
+    <div class="toolbar">
+      <span class="badge" id="viewBadge">Top</span>
+      <span class="stat" id="stat">Zoom 100%% • Nessuna misura</span>
+    </div>
+    <svg id="scene" viewBox="0 0 1000 520" aria-label="FM-A blueprint interattivo">
+      <defs>
+        <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+          <path d="M0,0 L8,4 L0,8 z" fill="#8b95a7"/>
+        </marker>
+      </defs>
+      <!-- grid -->
+      <g class="grid" id="grid"></g>
+
+      <!-- CHASSIS (stilizzato, proporzioni leggibili) -->
+      <path id="chassis" class="chassis"
+        d="M120,60 L880,60 C908,60 930,82 930,110 L930,410 C930,438 908,460 880,460
+           L120,460 C92,460 70,438 70,410 L70,110 C70,82 92,60 120,60 Z
+           M160,120 L840,120 L840,400 L160,400 Z"/>
+
+      <!-- fori M2 (demo) -->
+      <g id="holes"></g>
+
+      <!-- markers -->
+      <g id="layer-roller"></g>
+      <g id="layer-brake" style="display:none"></g>
+      <g id="layer-damper"></g>
+      <g id="layer-plate"></g>
+      <g id="layer-wheel"></g>
+      <g id="layer-hw" style="display:none"></g>
+
+      <!-- misura -->
+      <g id="measure"></g>
+    </svg>
+  </section>
+</div>
+
+<div id="tip" hidden></div>
+
+<dialog id="sheet">
+  <header><strong>Scheda componente</strong><button class="btn" id="close">Chiudi</button></header>
+  <div class="pad">
+    <img id="pimg" alt="">
+    <div><span class="badge" id="pcat">—</span> • <span id="pview">—</span></div>
+    <h3 id="pname" style="margin:8px 0 6px">—</h3>
+    <div class="small"><b>Item No.</b> <span id="pcode">(da catalogo)</span></div>
+    <hr>
+    <div class="small"><b>Peso</b> <span id="pwt">—</span> • <b>Dimensioni</b> <span id="psz">—</span></div>
+    <div class="small" style="margin-top:8px;color:#93a1b5">Nota: in questa v2 i codici sono placeholder; la build collegata al catalogo Tamiya li mostrerà reali con foto ufficiale.</div>
+  </div>
+</dialog>
 
 <script>
-// Disegna griglia e fori M2 di demo
-(function(){
-  const gridV = document.getElementById('gridV');
-  const gridH = document.getElementById('gridH');
-  for(let x=0; x<=1000; x+=50){
-    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1',x); ln.setAttribute('y1',0);
-    ln.setAttribute('x2',x); ln.setAttribute('y2',520);
-    gridV.appendChild(ln);
-  }
-  for(let y=0; y<=520; y+=50){
-    const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
-    ln.setAttribute('x1',0); ln.setAttribute('y1',y);
-    ln.setAttribute('x2',1000); ln.setAttribute('y2',y);
-    gridH.appendChild(ln);
-  }
-  const holes = document.getElementById('holes');
-  // Fori di esempio dentro il rettangolo interno (160..840, 120..400)
-  for(let y=140, r=1; y<=380; y+=70, r++){
-    for(let x=200, c=1; x<=800; x+=80, c++){
-      const h = document.createElementNS('http://www.w3.org/2000/svg','circle');
-      h.setAttribute('class','hole'); h.setAttribute('cx',x); h.setAttribute('cy',y); h.setAttribute('r',3);
-      const tt = document.createElementNS('http://www.w3.org/2000/svg','title');
-      tt.textContent = `Foro M2 F${r}${c}`; h.appendChild(tt);
-      holes.appendChild(h);
-    }
-  }
-})();
-</script>
-<script>
-// Tooltip & modal
-const tip = document.getElementById('tip');
-const stage = document.getElementById('stage');
-const dlg = document.getElementById('sheet');
-const pimg = document.getElementById('pimg');
-const pname = document.getElementById('pname');
-const pcode = document.getElementById('pcode');
-const pcat = document.getElementById('pcat');
-const pview = document.getElementById('pview');
-const pwt = document.getElementById('pwt');
-const psz = document.getElementById('psz');
-const btnClose = document.getElementById('close');
-const btnAdd = document.getElementById('add');
+/* ====== Config scala (px -> mm) ======
+   Imposto 1 px = 0.25 mm (comodo per misure a schermo)
+*/
+const MM_PER_PX = 0.25;
 
-function showTip(e){
-  const t = e.target;
-  if(!t.classList || !t.classList.contains('mk')){ tip.hidden = true; return; }
-  tip.textContent = `${t.dataset.cat} · ${t.dataset.view}`;
-  tip.style.setProperty('--x', (e.clientX+14)+'px');
-  tip.style.setProperty('--y', (e.clientY+14)+'px');
-  tip.hidden = false;
+/* ====== Griglia ====== */
+const grid = document.getElementById('grid');
+for(let x=0; x<=1000; x+=50){
+  const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',x); ln.setAttribute('y1',0); ln.setAttribute('x2',x); ln.setAttribute('y2',520);
+  grid.appendChild(ln);
 }
-function openSheet(e){
-  const t = e.target;
-  if(!t.classList || !t.classList.contains('mk')) return;
-  pname.textContent = t.dataset.name || '—';
-  pcode.textContent = t.dataset.part || '(da catalogo)';
-  pcat.textContent  = t.dataset.cat || '—';
-  pview.textContent = t.dataset.view || '—';
-  pwt.textContent   = t.dataset.weight || '—';
-  psz.textContent   = t.dataset.size || '—';
-  // placeholder image
-  const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'>
-    <rect width='100%%' height='100%%' fill='#0a0d16'/>
-    <text x='50%%' y='50%%' dominant-baseline='middle' text-anchor='middle'
-      fill='#2b9cff' font-size='42' font-family='system-ui,Segoe UI,Roboto'>Foto componente (demo offline)</text>
-  </svg>`;
-  pimg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-  dlg.showModal();
+for(let y=0; y<=520; y+=50){
+  const ln = document.createElementNS('http://www.w3.org/2000/svg','line');
+  ln.setAttribute('x1',0); ln.setAttribute('y1',y); ln.setAttribute('x2',1000); ln.setAttribute('y2',y);
+  grid.appendChild(ln);
 }
-stage.addEventListener('pointermove', showTip);
-stage.addEventListener('pointerleave', ()=> tip.hidden = true);
-stage.addEventListener('click', openSheet);
-btnClose.addEventListener('click', ()=> dlg.close());
-btnAdd.addEventListener('click', ()=> { alert('Aggiunto al setup (demo). Nella versione completa useremo i codici ufficiali dal catalogo Tamiya.'); });
 
-// View toggle
-const btns = document.querySelectorAll('.toggle button');
-const gTop = document.getElementById('markers-top');
-const gBottom = document.getElementById('markers-bottom');
-btns.forEach(b=>b.addEventListener('click', ()=>{
-  btns.forEach(x=>x.classList.remove('active')); b.classList.add('active');
-  const v = b.dataset.view;
-  if(v==='top'){ gTop.style.display=''; gBottom.style.display='none'; }
-  else { gTop.style.display='none'; gBottom.style.display=''; }
-}));
+/* ====== Fori demo ====== */
+const holesG = document.getElementById('holes');
+const HOLES=[];
+for(let ry=0, y=140; y<=380; y+=70, ry++){
+  for(let cx=0, x=200; x<=800; x+=80, cx++){
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('class','hole'); c.setAttribute('cx',x); c.setAttribute('cy',y); c.setAttribute('r',3.5);
+    c.dataset.idx = `${ry}-${cx}`; // indice per misure
+    holesG.appendChild(c);
+    HOLES.push(c);
+  }
+}
 
-// Search (demo locale — scandisce i marker come finto catalogo)
-const q = document.getElementById('q');
-const results = document.getElementById('results');
-function search(){
-  const s = (q.value||'').trim().toLowerCase();
-  if(!s){ results.textContent=''; return; }
-  const mks = stage.querySelectorAll('.mk');
-  const rows = [];
-  mks.forEach(m=>{
-    const text = (m.dataset.name+' '+m.dataset.cat+' '+m.dataset.part).toLowerCase();
-    if(text.includes(s)){
-      rows.push(`<div>• <b>${m.dataset.name}</b> — <span class="muted">${m.dataset.cat}</span> — Item: <i>${m.dataset.part}</i></div>`);
-    }
+/* ====== Marker helper ====== */
+function mk(type, attrs){
+  const el = document.createElementNS('http://www.w3.org/2000/svg', type);
+  Object.entries(attrs).forEach(([k,v])=> el.setAttribute(k,v));
+  el.classList.add('mk', attrs.className);
+  return el;
+}
+function add(topOrBottom){
+  // Pulizia
+  ['layer-roller','layer-brake','layer-damper','layer-plate','layer-wheel','layer-hw'].forEach(id=>{
+    document.getElementById(id).innerHTML='';
   });
-  results.innerHTML = rows.length? rows.join('') : '<div class="muted">Nessun risultato nella demo locale. La versione collegata mostrerà il catalogo completo Tamiya.</div>';
-}
-document.getElementById('btn-search').onclick = search;
-document.getElementById('btn-clear').onclick = ()=>{ q.value=''; results.textContent=''; };
 
-// Export to PDF (usa Stampa)
-document.getElementById('btn-print').onclick = ()=> window.print();
+  // Top
+  if(topOrBottom==='top'){
+    const Lr = document.getElementById('layer-roller');
+    Lr.appendChild(mk('circle',{className:'roller', cx:210, cy:120, r:12,
+      'data-name':'Roller 19mm (front over)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top','data-weight':'— g','data-size':'Ø19 mm'}));
+    Lr.appendChild(mk('circle',{className:'roller', cx:790, cy:120, r:12,
+      'data-name':'Roller 19mm (front over)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
+    Lr.appendChild(mk('circle',{className:'roller', cx:230, cy:400, r:10,
+      'data-name':'Roller 13mm (rear under)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
+    Lr.appendChild(mk('circle',{className:'roller', cx:770, cy:400, r:10,
+      'data-name':'Roller 13mm (rear under)','data-part':'(da catalogo)','data-cat':'roller','data-view':'Top'}));
+
+    const Ld = document.getElementById('layer-damper');
+    Ld.appendChild(mk('rect',{className:'damper', x:470, y:360, width:60, height:20, rx:4,
+      'data-name':'Mass Damper Block 12g','data-part':'(da catalogo)','data-cat':'damper','data-view':'Top','data-weight':'12 g'}));
+
+    const Lw = document.getElementById('layer-wheel');
+    Lw.appendChild(mk('circle',{className:'wheel', cx:260, cy:260, r:28,'data-name':'Wheel/Tire 26mm','data-cat':'wheel','data-view':'Top'}));
+    Lw.appendChild(mk('circle',{className:'wheel', cx:740, cy:260, r:28,'data-name':'Wheel/Tire 26mm','data-cat':'wheel','data-view':'Top'}));
+
+    const Lp = document.getElementById('layer-plate');
+    Lp.appendChild(mk('rect',{className:'plate', x:170, y:90, width:660, height:22, rx:4,
+      'data-name':'Front FRP Stay','data-cat':'plate','data-view':'Top'}));
+    Lp.appendChild(mk('rect',{className:'plate', x:190, y:390, width:620, height:18, rx:4,
+      'data-name':'Rear Multi Roller FRP','data-cat':'plate','data-view':'Top'}));
+  } else { // Bottom
+    document.getElementById('layer-brake').style.display='';
+    const Lb = document.getElementById('layer-brake');
+    Lb.appendChild(mk('rect',{className:'brake', x:420, y:410, width:160, height:12, rx:2,
+      'data-name':'Brake Sponge 2.5mm','data-cat':'brake','data-view':'Bottom','data-size':'spessore 2.5 mm'}));
+    const Lp = document.getElementById('layer-plate');
+    Lp.appendChild(mk('rect',{className:'plate', x:430, y:430, width:140, height:12, rx:3,
+      'data-name':'Under Guard','data-cat':'plate','data-view':'Bottom'}));
+    const Lh = document.getElementById('layer-hw');
+    Lh.style.display='';
+    Lh.appendChild(mk('rect',{className:'hw', x:220, y:392, width:4, height:30, 'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}));
+    Lh.appendChild(mk('rect',{className:'hw', x:776, y:392, width:4, height:30, 'data-name':'Vite M2x25','data-cat':'hw','data-view':'Bottom'}));
+  }
+}
+add('top');
+
+/* ====== Toggle viste e layer ====== */
+const viewBadge=document.getElementById('viewBadge');
+document.querySelectorAll('input[name=view]').forEach(r=>{
+  r.addEventListener('change',()=>{
+    const v=r.value; viewBadge.textContent=v[0].toUpperCase()+v.slice(1);
+    // mostra/nascondi layer bottom-specific
+    document.getElementById('layer-brake').style.display = (v==='bottom')? '' : 'none';
+    document.getElementById('layer-hw').style.display = (v==='bottom')? '' : 'none';
+    add(v);
+  });
+});
+document.querySelectorAll('.lay').forEach(cb=>{
+  cb.addEventListener('change',()=>{
+    const id='layer-'+cb.dataset.layer;
+    const g=document.getElementById(id);
+    g.style.display = cb.checked? '' : 'none';
+  });
+});
+
+/* ====== Zoom/Pan ====== */
+const svg=document.getElementById('scene'), stat=document.getElementById('stat');
+let zoom=1, panX=0, panY=0, dragging=false, last={x:0,y:0};
+function applyView(){ svg.style.transform=`translate(${panX}px,${panY}px) scale(${zoom})`; stat.textContent=`Zoom ${Math.round(zoom*100)}% • ${measureText}`}
+svg.style.transformOrigin='0 0';
+svg.addEventListener('wheel',e=>{ e.preventDefault(); const k=Math.exp(-e.deltaY*0.0015); zoom=Math.min(3,Math.max(.6,zoom*k)); applyView();},{passive:false});
+svg.addEventListener('pointerdown',e=>{ dragging=true; last={x:e.clientX,y:e.clientY}; svg.setPointerCapture(e.pointerId);});
+svg.addEventListener('pointermove',e=>{ if(!dragging)return; panX+=e.clientX-last.x; panY+=e.clientY-last.y; last={x:e.clientX,y:e.clientY}; applyView();});
+svg.addEventListener('pointerup',e=>{ dragging=false; svg.releasePointerCapture(e.pointerId)});
+
+/* ====== Tooltip + Modal ====== */
+const tip=document.getElementById('tip'), dlg=document.getElementById('sheet');
+const pimg=document.getElementById('pimg'), pcat=document.getElementById('pcat'), pview=document.getElementById('pview'),
+      pname=document.getElementById('pname'), pcode=document.getElementById('pcode'), pwt=document.getElementById('pwt'), psz=document.getElementById('psz');
+svg.addEventListener('pointermove',e=>{
+  const t=e.target;
+  if(t.classList && t.classList.contains('mk')){
+    tip.textContent=`${t.dataset.cat} • ${t.dataset.view}`;
+    tip.style.left=(e.clientX+12)+'px'; tip.style.top=(e.clientY+12)+'px'; tip.hidden=false;
+  } else tip.hidden=true;
+});
+svg.addEventListener('click',e=>{
+  const t=e.target;
+  if(!(t.classList && t.classList.contains('mk'))) return;
+  pcat.textContent=(t.dataset.cat||'').toUpperCase(); pview.textContent=t.dataset.view||'-';
+  pname.textContent=t.dataset.name||'-'; pcode.textContent=t.dataset.part||'(da catalogo)';
+  pwt.textContent=t.dataset.weight||'—'; psz.textContent=t.dataset.size||'—';
+  const ph=`<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'>
+    <rect width='100%%' height='100%%' fill='#0a0f18'/><text x='50%%' y='50%%' text-anchor='middle' dominant-baseline='middle'
+     font-size='40' fill='#2b9cff' font-family='system-ui,Segoe UI,Roboto'>Foto componente (demo)</text></svg>`;
+  pimg.src='data:image/svg+xml;utf8,'+encodeURIComponent(ph);
+  dlg.showModal();
+});
+document.getElementById('close').onclick=()=>dlg.close();
+
+/* ====== Misuratore (click su due fori) ====== */
+const mG=document.getElementById('measure'); let mSel=[];
+let measureText='Nessuna misura';
+svg.addEventListener('click',e=>{
+  if(e.target.classList && e.target.classList.contains('hole')){
+    mSel.push(e.target); if(mSel.length>2) mSel=[e.target];
+    drawMeasure();
+  }
+});
+function drawMeasure(){
+  mG.innerHTML=''; if(mSel.length<2){ measureText='Nessuna misura'; applyView(); return; }
+  const [a,b]=mSel, ax=a.cx.baseVal.value, ay=a.cy.baseVal.value, bx=b.cx.baseVal.value, by=b.cy.baseVal.value;
+  const dx=bx-ax, dy=by-ay, px=Math.hypot(dx,dy), mm=(px*MM_PER_PX).toFixed(1);
+  const l=document.createElementNS('http://www.w3.org/2000/svg','line');
+  l.setAttribute('x1',ax); l.setAttribute('y1',ay); l.setAttribute('x2',bx); l.setAttribute('y2',by); l.setAttribute('class','ruler');
+  mG.appendChild(l);
+  const txt=document.createElementNS('http://www.w3.org/2000/svg','text');
+  txt.setAttribute('x',(ax+bx)/2); txt.setAttribute('y',(ay+by)/2-6); txt.setAttribute('fill','#cbd5e1'); txt.setAttribute('font-size','12');
+  txt.setAttribute('text-anchor','middle'); txt.textContent=`${mm} mm`;
+  mG.appendChild(txt);
+  measureText=`Distanza ${mm} mm`;
+  applyView();
+}
+
+/* ====== Stampa ====== */
+document.getElementById('print').onclick=()=>window.print();
 </script>
 </body>
 </html>
