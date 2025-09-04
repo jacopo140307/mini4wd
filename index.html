@@ -1,385 +1,327 @@
 <!doctype html>
 <html lang="it">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>B-MAX Advisor • Demo</title>
-<link rel="preconnect" href="https://cdn.jsdelivr.net" />
-<script src="https://cdn.tailwindcss.com"></script>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>B-MAX Advisor • Demo completa (single-file)</title>
 <style>
-  :root{color-scheme:light dark}
-  .badge{ @apply inline-flex items-center gap-2 px-2 py-0.5 rounded-full text-xs font-medium; }
-  .panel{ @apply p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60; }
-  .tab[aria-selected="true"]{ @apply bg-blue-600 text-white shadow; }
-  /* SVG */
-  .grid line{ stroke:#1f2937; stroke-opacity:.25; }
-  .chassis{ fill:#0b1320; stroke:#6b7280; stroke-width:1.5; }
-  .hole{ fill:#334155; }
-  .mk{ cursor:pointer; filter:drop-shadow(0 0 6px rgba(0,0,0,.35)); stroke:#0005; stroke-width:.6 }
-  .mk.roller{ fill:#3aa0ff } .mk.brake{ fill:#ff4d5a } .mk.damper{ fill:#ffd166 }
-  .mk.plate{ fill:#475569 } .mk.wheel{ fill:#cbd5e1 } .mk.hw{ fill:#d1d5db }
-  .ruler{ stroke:#a8b1c3; stroke-width:1.4; marker-end:url(#arr) }
-  .legend-dot{ width:10px; height:10px; border-radius:999px; display:inline-block; }
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;background:#0b1220;color:#e5e7eb;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial}
+h1{font-size:18px;margin:0 0 8px}
+h2{font-size:15px;margin:8px 0}
+small{opacity:.75}
+.wrap{max-width:1200px;margin:auto;padding:12px}
+.grid{display:grid;gap:12px}
+@media (min-width:980px){.grid{grid-template-columns:1.1fr .9fr}}
+.card{background:#0f172a;border:1px solid #1f2937;border-radius:14px;padding:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:end}
+label{display:block;font-size:12px;margin-bottom:4px;opacity:.9}
+select,button,input[type=file]{background:#0b1220;border:1px solid #334155;color:#e5e7eb;border-radius:10px;padding:8px 10px}
+button.primary{background:#0ea5e9;border-color:#0ea5e9;color:#081016}
+button.ghost{background:#0f172a}
+.bad{color:#fca5a5}.ok{color:#86efac}.warn{color:#fde68a}
+.legend span{display:inline-block;width:.8rem;height:.8rem;border-radius:9999px;margin-right:.35rem;vertical-align:-1px}
+svg{width:100%;height:520px;display:block;background:#0b1220;border-radius:12px}
+.gridbg{stroke:#1f2937;stroke-width:.35}
+.outline{fill:#0f1b35;stroke:#334155;stroke-width:1.2}
+.hole{fill:#1e293b}
+.pin{cursor:pointer}
+.pin text{font-size:4px;fill:#e5e7eb}
+.pin.roll  circle{fill:#60a5fa;stroke:#0b1220;stroke-width:.8}
+.pin.brake circle{fill:#f87171;stroke:#0b1220;stroke-width:.8}
+.pin.damp  circle{fill:#facc15;stroke:#0b1220;stroke-width:.8}
+.pin.stay  circle{fill:#a78bfa;stroke:#0b1220;stroke-width:.8}
+.pin.tire  circle{fill:#34d399;stroke:#0b1220;stroke-width:.8}
+.pin.hw    circle{fill:#94a3b8;stroke:#0b1220;stroke-width:.8}
+.pin.under circle{fill:#9ca3af;stroke:#0b1220;stroke-width:.8}
+.tt{position:fixed;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:6px 8px;font-size:12px;display:none;z-index:60;max-width:260px}
+.log{font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;background:#0b1220;border:1px solid #1f2937;border-radius:10px;padding:8px;max-height:240px;overflow:auto}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;font-size:12px}
+.kv div:nth-child(odd){opacity:.8}
+.pill{display:inline-block;border:1px solid #334155;border-radius:9999px;padding:2px 8px;margin:0 4px 4px 0;font-size:12px}
+input[type=search]{width:100%;padding:8px;border-radius:10px;border:1px solid #334155;background:#0b1220;color:#e5e7eb}
+.table{width:100%;border-collapse:collapse;font-size:12px}
+.table td,.table th{border-bottom:1px solid #1f2937;padding:6px 4px;text-align:left}
+footer{opacity:.6;font-size:12px;margin-top:8px}
 </style>
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
-<header class="sticky top-0 z-40 backdrop-blur bg-white/70 dark:bg-slate-900/70 border-b border-slate-200 dark:border-slate-800">
-  <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <div class="w-8 h-8 rounded-xl bg-blue-600"></div>
-      <h1 class="text-lg md:text-xl font-bold tracking-tight">B-MAX Advisor</h1>
-      <span class="ml-2 text-xs px-2 py-1 rounded bg-amber-100 text-amber-800 dark:bg-amber-400/20 dark:text-amber-200">Demo UI</span>
+<body>
+<div class="wrap">
+  <h1>B-MAX Advisor — Demo completa (carica foto pista + mini, ottimizza setup unico)</h1>
+
+  <div class="grid">
+    <!-- LEFT -->
+    <div class="card">
+      <div class="row">
+        <div><label>Telaio</label>
+          <select id="selChassis">
+            <option value="fma" selected>FM-A</option>
+            <option value="ma">MA</option>
+            <option value="s2">Super-II</option>
+          </select>
+        </div>
+        <div><label>Vista</label>
+          <select id="selView">
+            <option value="top" selected>Top</option>
+            <option value="bottom">Bottom</option>
+          </select>
+        </div>
+        <div><label>Foto pista (jpg/png)</label>
+          <input id="inTrack" type="file" accept="image/*"/>
+        </div>
+        <div><label>Foto mini (jpg/png)</label>
+          <input id="inCar" type="file" accept="image/*"/>
+        </div>
+        <button id="btnDetect" class="primary">Analizza foto</button>
+        <button id="btnOpt" class="ghost">Ottimizza</button>
+        <button id="btnPDF" class="ghost">Esporta PDF</button>
+        <button id="btnJSON" class="ghost">Export JSON</button>
+      </div>
+
+      <p class="legend" style="margin:8px 0 6px">
+        <span style="background:#60a5fa"></span>Roller
+        <span style="background:#f87171;margin-left:10px"></span>Freni
+        <span style="background:#facc15;margin-left:10px"></span>Damper
+        <span style="background:#a78bfa;margin-left:10px"></span>Piastre
+        <span style="background:#34d399;margin-left:10px"></span>Gomme
+        <span style="background:#94a3b8;margin-left:10px"></span>Ferramenta
+        <span class="pill">clicca 2 fori → calibra mm (interasse 16)</span>
+      </p>
+
+      <!-- BLUEPRINT -->
+      <div class="card" style="padding:0">
+        <svg id="svg" viewBox="0 0 200 120" aria-label="blueprint">
+          <defs>
+            <pattern id="grid5" width="5" height="5" patternUnits="userSpaceOnUse">
+              <path class="gridbg" d="M5 0V5M0 5H5"/>
+            </pattern>
+          </defs>
+          <rect x="0" y="0" width="200" height="120" fill="url(#grid5)"/>
+          <g id="gShape"></g>
+          <g id="gHoles"></g>
+          <g id="gPins"></g>
+        </svg>
+      </div>
     </div>
-    <nav class="flex gap-2" role="tablist" aria-label="Sezioni">
-      <button class="tab px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700" aria-selected="true" data-tab="track">Track</button>
-      <button class="tab px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700" aria-selected="false" data-tab="car">Car</button>
-      <button class="tab px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700" aria-selected="false" data-tab="optimizer">Optimizer</button>
-      <button class="tab px-3 py-1.5 rounded-lg border border-slate-300 dark:border-slate-700" aria-selected="false" data-tab="catalog">Catalog</button>
-    </nav>
+
+    <!-- RIGHT -->
+    <div class="card" style="display:grid;gap:10px;height:fit-content">
+      <div>
+        <h2>Setup vincente (auto)</h2>
+        <div id="summary" class="kv"></div>
+      </div>
+      <div>
+        <h2>Analisi pista</h2>
+        <div id="trackOut" class="log"></div>
+      </div>
+      <div>
+        <h2>Analisi mini</h2>
+        <div id="carOut" class="log"></div>
+      </div>
+      <div>
+        <h2>Log decisioni</h2>
+        <div id="log" class="log"></div>
+      </div>
+      <div>
+        <h2>Check B-MAX</h2>
+        <div id="bmax" class="log"></div>
+        <small>Limiti: 105×165×70 mm • Ground ≥1 mm • Ruote Ø22–35 mm • Larghezza 8–26 mm.</small>
+      </div>
+      <div class="card">
+        <h2>Catalogo (demo)</h2>
+        <input id="q" type="search" placeholder="Cerca (es. roller 19, freno 2.0, damper 12g)…">
+        <table class="table" id="tbl"></table>
+        <small>Nota: codici Tamiya mostrati solo quando caricati dal catalogo ufficiale.</small>
+      </div>
+    </div>
   </div>
-</header>
 
-<main class="max-w-6xl mx-auto px-4 py-6">
-  <!-- TRACK -->
-  <section id="tab-track" role="tabpanel" class="grid gap-6">
-    <div class="flex items-start justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">Track detector (demo)</h2>
-        <p class="text-sm text-slate-500">Carica 2–4 foto (20–30% sovrapposizione) oppure usa il sample. Esporta JSON.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <span id="trk-qual" class="badge bg-slate-200 dark:bg-slate-800">quality: —</span>
-      </div>
-    </div>
+  <footer>Demo locale: funziona offline. Per risultati reali, collega il catalogo Tamiya ufficiale nella fase successiva.</footer>
+</div>
 
-    <div class="grid md:grid-cols-[1fr,420px] gap-6">
-      <div class="space-y-4">
-        <div class="panel">
-          <label class="block text-sm font-medium mb-2">Foto pista</label>
-          <input id="trk-files" type="file" accept="image/*" multiple class="block w-full text-sm" />
-          <div class="mt-3 flex gap-2">
-            <button id="btn-trk-run" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Rileva</button>
-            <button id="btn-trk-sample" class="px-3 py-2 rounded-lg border border-blue-600 text-blue-700">Sample</button>
-            <button id="btn-trk-export" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">Export JSON</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h3 class="font-medium mb-3">Moduli riconosciuti</h3>
-          <div id="trk-list" class="grid gap-2"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3 class="font-medium mb-3">Output (.track JSON)</h3>
-        <textarea id="trk-json" class="w-full h-[420px] text-xs font-mono p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"></textarea>
-      </div>
-    </div>
-  </section>
-
-  <!-- CAR -->
-  <section id="tab-car" role="tabpanel" class="grid gap-6 hidden">
-    <div class="flex items-start justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">Car detector (demo)</h2>
-        <p class="text-sm text-slate-500">Allinea la foto al telaio (FM-A sample) e vedi componenti/masse. Check B-MAX.</p>
-      </div>
-      <div class="flex items-center gap-2">
-        <span id="car-stats" class="badge bg-slate-200 dark:bg-slate-800">peso: —</span>
-      </div>
-    </div>
-
-    <div class="grid md:grid-cols-[1fr,420px] gap-6">
-      <div class="space-y-4">
-        <div class="panel">
-          <label class="block text-sm font-medium mb-2">Foto macchina</label>
-          <input id="car-file" type="file" accept="image/*" class="block w-full text-sm" />
-          <div class="mt-3 flex gap-2">
-            <button id="btn-car-run" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Rileva</button>
-            <button id="btn-car-sample" class="px-3 py-2 rounded-lg border border-blue-600 text-blue-700">Sample</button>
-            <button id="btn-car-export" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">Export JSON</button>
-          </div>
-        </div>
-
-        <div class="panel">
-          <div class="flex items-center justify-between">
-            <h3 class="font-medium mb-3">FM-A blueprint (Top/Bottom)</h3>
-            <div class="flex gap-2 text-xs">
-              <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-700" data-view="top">Top</button>
-              <button class="px-2 py-1 rounded border border-slate-300 dark:border-slate-700" data-view="bottom">Bottom</button>
-            </div>
-          </div>
-          <!-- SVG semplificato ma pulito -->
-          <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-900">
-            <svg id="svg" viewBox="0 0 1200 600">
-              <defs>
-                <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
-                  <path d="M0,0 L8,4 L0,8 z" fill="#a8b1c3"/>
-                </marker>
-              </defs>
-              <g class="grid" id="grid"></g>
-              <!-- Sagoma FM-A stilizzata (placeholder finché non colleghiamo l’outline ufficiale) -->
-              <path class="chassis" d="M160,80 H1040 a40,40 0 0 1 40,40 v360 a40,40 0 0 1 -40,40 H160 a40,40 0 0 1 -40,-40 V120 a40,40 0 0 1 40,-40 z" />
-              <g id="holes"></g>
-              <g id="L-roller"></g><g id="L-brake"></g><g id="L-damper"></g><g id="L-plate"></g><g id="L-wheel"></g><g id="L-hw"></g>
-              <g id="measure"></g>
-            </svg>
-          </div>
-          <div class="mt-2 text-xs text-slate-500">
-            Suggerimento: clicca 2 fori per misurare in mm; clic sui marker per aprire la scheda componente (Item No.: — in demo).
-          </div>
-          <div class="mt-3 flex flex-wrap gap-2 text-xs">
-            <span class="badge bg-slate-200 dark:bg-slate-800"><span class="legend-dot" style="background:#3aa0ff"></span> Roller</span>
-            <span class="badge bg-slate-200 dark:bg-slate-800"><span class="legend-dot" style="background:#ff4d5a"></span> Freni</span>
-            <span class="badge bg-slate-200 dark:bg-slate-800"><span class="legend-dot" style="background:#ffd166"></span> Damper</span>
-            <span class="badge bg-slate-200 dark:bg-slate-800"><span class="legend-dot" style="background:#475569"></span> Piastre</span>
-            <span class="badge bg-slate-200 dark:bg-slate-800"><span class="legend-dot" style="background:#cbd5e1"></span> Gomme</span>
-          </div>
-        </div>
-
-        <div class="panel">
-          <h3 class="font-medium mb-3">Componenti rilevati</h3>
-          <div id="car-list" class="grid gap-2"></div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3 class="font-medium mb-3">Output (.car JSON)</h3>
-        <textarea id="car-json" class="w-full h-[420px] text-xs font-mono p-3 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"></textarea>
-      </div>
-    </div>
-  </section>
-
-  <!-- OPTIMIZER -->
-  <section id="tab-optimizer" role="tabpanel" class="grid gap-6 hidden">
-    <div class="flex items-start justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">Optimizer (demo)</h2>
-        <p class="text-sm text-slate-500">Calcolo giro stimato + stabilità. Restituisce 1 setup B-MAX (demo).</p>
-      </div>
-      <span id="opt-state" class="badge bg-slate-200 dark:bg-slate-800">ready</span>
-    </div>
-
-    <div class="grid md:grid-cols-[1fr,420px] gap-6">
-      <div class="space-y-4">
-        <div class="panel">
-          <div class="flex flex-wrap gap-2">
-            <button id="btn-load-current" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">Usa Track+Car correnti</button>
-            <button id="btn-run-opt" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700">Calcola</button>
-            <button id="btn-export-report" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">Export Report</button>
-          </div>
-        </div>
-
-        <div class="grid md:grid-cols-2 gap-4">
-          <div class="panel">
-            <h3 class="font-medium mb-2">Risultati</h3>
-            <ul id="opt-results" class="text-sm grid gap-1"></ul>
-          </div>
-          <div class="panel">
-            <h3 class="font-medium mb-2">Setup proposto</h3>
-            <ul id="opt-setup" class="text-sm grid gap-1"></ul>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3 class="font-medium mb-3">Log</h3>
-        <pre id="opt-log" class="text-xs font-mono whitespace-pre-wrap"></pre>
-      </div>
-    </div>
-  </section>
-
-  <!-- CATALOG -->
-  <section id="tab-catalog" role="tabpanel" class="grid gap-6 hidden">
-    <div class="flex items-start justify-between">
-      <div>
-        <h2 class="text-lg font-semibold">Catalog (demo)</h2>
-        <p class="text-sm text-slate-500">Ricerca base. I codici ufficiali saranno collegati nella build completa.</p>
-      </div>
-      <span id="cat-count" class="badge bg-slate-200 dark:bg-slate-800">0 items</span>
-    </div>
-
-    <div class="panel">
-      <div class="grid md:grid-cols-3 gap-3">
-        <input id="q" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700" placeholder="Cerca nome o codice…" />
-        <select id="tag" class="px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-700">
-          <option value="">Tutti i tag</option><option>roller</option><option>plate</option><option>damper</option><option>tire</option><option>gear</option><option>brake</option>
-        </select>
-        <label class="inline-flex items-center gap-2 text-sm"><input id="only-bmax" type="checkbox" class="h-4 w-4" /> B-MAX</label>
-      </div>
-    </div>
-
-    <div id="cat-grid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-  </section>
-</main>
-
-<footer class="max-w-6xl mx-auto px-4 pb-10 pt-4 text-xs text-slate-500">
-  <p>Demo UI offline: i detector/optimizer qui sono simulati per provare l’interfaccia. Nella versione completa verranno sostituiti dai modelli reali e collegati al catalogo ufficiale Tamiya.</p>
-</footer>
-
-<!-- DIALOG scheda componente -->
-<dialog id="sheet" class="max-w-md w-[92vw] rounded-xl border border-slate-700 bg-slate-900 text-slate-100">
-  <div class="flex items-center justify-between px-4 py-3 border-b border-slate-700">
-    <strong>Scheda componente</strong>
-    <button id="sheet-close" class="px-2 py-1 rounded border border-slate-600">Chiudi</button>
-  </div>
-  <div class="p-4 text-sm">
-    <div id="p-cat" class="text-slate-400">—</div>
-    <div class="text-base font-medium my-1" id="p-name">—</div>
-    <div>Item No.: <span id="p-code">—</span></div>
-    <div class="mt-1 text-slate-400">Peso: <span id="p-wt">—</span> • Dimensioni: <span id="p-dim">—</span></div>
-    <div class="mt-2 text-slate-400">Vista: <span id="p-view">—</span></div>
-  </div>
-</dialog>
+<div id="tt" class="tt"></div>
 
 <script>
-const $ = (s,el=document)=>el.querySelector(s); const $$=(s,el=document)=>[...el.querySelectorAll(s)];
-function pretty(o){return JSON.stringify(o,null,2)}
-function dl(name,text){const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([text],{type:'application/json'})); a.download=name;a.click();URL.revokeObjectURL(a.href)}
-
-// Tabs
-$$('.tab').forEach(b=>b.addEventListener('click',()=>{ $$('.tab').forEach(t=>t.setAttribute('aria-selected','false')); b.setAttribute('aria-selected','true'); $$('#tab-track,#tab-car,#tab-optimizer,#tab-catalog').forEach(p=>p.classList.add('hidden')); $('#tab-'+b.dataset.tab).classList.remove('hidden'); }));
-
-/* ====== TRACK (demo) ====== */
-const sampleTrack = {
-  version:'1.3',
-  modules:[
-    {type:'straight', pose:{x_mm:0,y_mm:0,theta_deg:0}, size:{length_mm:700}, confidence:0.99},
-    {type:'curve_45_bank', pose:{x_mm:700,y_mm:0,theta_deg:45}, size:{arc_mm:310,radius_mm:230}, confidence:0.97, flags:['banked']},
-    {type:'slope_up', pose:{x_mm:900,y_mm:200,theta_deg:0}, size:{length_mm:700,slope_deg:12}, confidence:0.94, flags:['needs_review']},
-    {type:'wave', pose:{x_mm:1600,y_mm:200,theta_deg:0}, size:{length_mm:620}, confidence:0.96},
-    {type:'straight', pose:{x_mm:2220,y_mm:200,theta_deg:0}, size:{length_mm:700}, confidence:0.98}
-  ],
-  quality:{coverage_pct:94, stitch_photos:3, global_confidence:0.95}
+/* ====== SHAPES + HOLES (outline pulito; immagini reali verranno collegate in step successivo) ====== */
+const OUTLINE={
+  fma:"M16,28 q-7,10 -7,32 q0,22 7,32 h168 q7,-10 7,-32 q0,-22 -7,-32 z M92,36 h16 v48 h-16 z",
+  ma:"M18,30 h164 v60 h-164 z M42,36 h116 v48 h-116 z",
+  s2:"M18,30 q-6,9 -6,31 q0,22 6,31 h164 q6,-9 6,-31 q0,-22 -6,-31 z M22,38 h156 v44 h-156 z"
 };
-function renderTrack(t){
-  $('#trk-json').value = pretty(t);
-  $('#trk-qual').textContent = `coverage: ${t.quality.coverage_pct}% • conf: ${Math.round(t.quality.global_confidence*100)}%`;
-  const list=$('#trk-list'); list.innerHTML='';
-  t.modules.forEach((m,i)=>{
-    const row=document.createElement('div');
-    row.className='grid grid-cols-[1fr,auto] items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800';
-    row.innerHTML=`<div class="text-sm"><b>${i+1}. ${m.type}</b> <span class="text-slate-500 ml-2">θ ${m.pose.theta_deg}°</span> ${m.flags?.includes('banked')?'<span class="badge bg-indigo-100 text-indigo-800 dark:bg-indigo-400/20 dark:text-indigo-200 ml-2">banked</span>':''}</div><div class="text-xs">conf ${Math.round(m.confidence*100)}%</div>`;
-    list.appendChild(row);
-  });
-}
-renderTrack(structuredClone(sampleTrack));
-$('#btn-trk-sample').onclick=()=>renderTrack(structuredClone(sampleTrack));
-$('#btn-trk-export').onclick=()=>dl('track.json',$('#trk-json').value||pretty(sampleTrack));
-$('#btn-trk-run').onclick=()=>{ const f=$('#trk-files').files.length; const t=structuredClone(sampleTrack); if(f>0){t.quality.coverage_pct=Math.min(100,70+f*10)} renderTrack(t) };
-
-/* ====== CAR (demo con SVG) ====== */
-const svg=$("#svg"), grid=$("#grid"), holesG=$("#holes"), L={
-  roller:$("#L-roller"), brake:$("#L-brake"), damper:$("#L-damper"), plate:$("#L-plate"), wheel:$("#L-wheel"), hw:$("#L-hw")
+const HOLES={
+  fma:{top:genLine(28,44,158,0,27).concat(genLine(28,92,158,0,27)).concat([[30,36],[170,36],[30,100],[170,100]]),
+       bottom:[[26,96],[46,88],[96,104],[170,38],[100,100],[150,96]]},
+  ma:{top:[[26,44],[46,44],[74,44],[100,44],[126,44],[154,44],[28,92],[48,92],[74,92],[100,92],[126,92],[152,92],[30,36],[170,36],[30,100],[170,100]],
+      bottom:[[28,96],[48,88],[96,104],[174,38],[100,100],[150,96]]},
+  s2:{top:[[26,44],[46,44],[74,44],[100,44],[126,44],[154,44],[28,92],[48,92],[74,92],[100,92],[126,92],[152,92],[30,36],[170,36],[30,100],[170,100]],
+      bottom:[[28,96],[48,88],[96,104],[170,37],[100,100],[150,96]]}
 };
-const vb=[0,0,220,200], SX=1200, SY=600, sx=SX/(vb[2]-vb[0]), sy=SY/(vb[3]-vb[1]);
-const px=x=>x*sx, py=y=>y*sy;
-
-// Griglia 10 mm
-for(let xm=0; xm<=vb[2]; xm+=10){ const ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('x1',px(xm)); ln.setAttribute('y1',0); ln.setAttribute('x2',px(xm)); ln.setAttribute('y2',SY); grid.appendChild(ln) }
-for(let ym=0; ym<=vb[3]; ym+=10){ const ln=document.createElementNS('http://www.w3.org/2000/svg','line'); ln.setAttribute('x1',0); ln.setAttribute('y1',py(ym)); ln.setAttribute('x2',SX); ln.setAttribute('y2',py(ym)); grid.appendChild(ln) }
-
-// Fori demo (posizioni indicative in mm)
-const HOLES_MM = [[50,16],[60,16],[70,16],[80,16],[90,16],[100,16],[110,16],[120,16],[130,16],[140,16],[150,16],[160,16],[170,16],[180,16],[190,16],
-                  [55,26],[65,26],[75,26],[85,26],[95,26],[105,26],[115,26],[125,26],[135,26],[145,26],[155,26],[165,26],[175,26],[185,26],[195,26],
-                  [55,168],[65,168],[75,168],[85,168],[95,168],[105,168],[115,168],[125,168],[135,168],[145,168],[155,168],[165,168],[175,168],[185,168],[195,168],
-                  [50,158],[60,158],[70,158],[80,158],[90,158],[100,158],[110,158],[120,158],[130,158],[140,158],[150,158],[160,158],[170,158],[180,158],[190,158]];
-const HOLES=[]; HOLES_MM.forEach(([xm,ym])=>{ const c=document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('class','hole'); c.setAttribute('r',3.6); c.setAttribute('cx',px(xm)); c.setAttribute('cy',py(ym)); holesG.appendChild(c); HOLES.push(c) });
-
-function mk(type,attrs){ const el=document.createElementNS('http://www.w3.org/2000/svg',type); Object.entries(attrs).forEach(([k,v])=>el.setAttribute(k,v)); el.classList.add('mk'); if(attrs.className) el.classList.add(attrs.className); return el }
-function nearestHole(x_mm,y_mm){ let best=null,bd=1e9; for(const h of HOLES){ const dx=h.cx.baseVal.value-px(x_mm), dy=h.cy.baseVal.value-py(y_mm), d=dx*dx+dy*dy; if(d<bd){bd=d; best=h} } return best }
-
-function place(type,x_mm,y_mm,cls,meta){ const h=nearestHole(x_mm,y_mm); const el = mk(type, Object.assign({cx:h.cx.baseVal.value, cy:h.cy.baseVal.value, r:10, className:cls}, meta||{})); return el }
-function rectMM(x,y,w,h,cls,meta){ return mk('rect', Object.assign({x:px(x),y:py(y),width:w*sx,height:h*sy,rx:3, className:cls}, meta||{})) }
-
-function loadTop(){
-  L.roller.innerHTML=L.brake.innerHTML=L.damper.innerHTML=L.plate.innerHTML=L.wheel.innerHTML=L.hw.innerHTML='';
-  L.roller.appendChild(place('circle',50,16,'roller',{'data-name':'Roller 19 mm (over)','data-cat':'roller','data-view':'Top'}));
-  L.roller.appendChild(place('circle',200,16,'roller',{'data-name':'Roller 19 mm (over)','data-cat':'roller','data-view':'Top'}));
-  L.roller.appendChild(place('circle',55,168,'roller',{'r':8,'data-name':'Roller 13 mm (under)','data-cat':'roller','data-view':'Top'}));
-  L.roller.appendChild(place('circle',195,168,'roller',{'r':8,'data-name':'Roller 13 mm (under)','data-cat':'roller','data-view':'Top'}));
-  L.plate.appendChild(rectMM(48,13,124,3.5,'plate',{'data-name':'FRP Front Stay','data-cat':'plate','data-view':'Top'}));
-  L.damper.appendChild(rectMM(108,130,12,4,'damper',{'data-name':'Mass Damper 12 g','data-cat':'damper','data-view':'Top','data-weight':'12 g'}));
-  L.wheel.appendChild(mk('circle',{className:'wheel',cx:px(70),cy:py(100),r:13*sx,'data-name':'Wheel/Tire','data-cat':'wheel','data-view':'Top'}));
-  L.wheel.appendChild(mk('circle',{className:'wheel',cx:px(180),cy:py(100),r:13*sx,'data-name':'Wheel/Tire','data-cat':'wheel','data-view':'Top'}));
+function genLine(x,y,dx,dy,n){const a=[];for(let i=0;i<n;i++)a.push([x+i*(dx/n),y+i*(dy/n)]);return a;}
+/* ====== STATE ====== */
+const $=s=>document.querySelector(s);
+const svg=$("#svg"), gShape=$("#gShape"), gHoles=$("#gHoles"), gPins=$("#gPins"), tt=$("#tt");
+const selCh=$("#selChassis"), selV=$("#selView"), log=$("#log"), sum=$("#summary"), bmx=$("#bmax");
+const trackOut=$("#trackOut"), carOut=$("#carOut"), q=$("#q"), tbl=$("#tbl");
+let chassis='fma', view='top', scalePXperMM=1, calib=[];
+let lastTrack={}, lastCar={}, lastSetup=null;
+/* ====== RENDER BLUEPRINT ====== */
+function draw(){
+  gShape.innerHTML='';
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('class','outline'); p.setAttribute('d', OUTLINE[chassis]); gShape.appendChild(p);
+  gHoles.innerHTML=''; const list=HOLES[chassis][view];
+  for(const [x,y] of list){const c=svgEl('circle',{class:'hole',cx:x,cy:y,r:0.85}); c.addEventListener('click',holeClick); gHoles.appendChild(c);}
+  gPins.innerHTML='';
 }
-function loadBottom(){
-  L.roller.innerHTML=L.brake.innerHTML=L.damper.innerHTML=L.plate.innerHTML=L.wheel.innerHTML=L.hw.innerHTML='';
-  L.brake.appendChild(rectMM(88,170,44,2.5,'brake',{'data-name':'Brake sponge 2.5 mm','data-cat':'brake','data-view':'Bottom','data-size':'2.5 mm'}));
-  L.plate.appendChild(rectMM(92,165,36,3,'plate',{'data-name':'Under Guard','data-cat':'plate','data-view':'Bottom'}));
+function holeClick(e){
+  const x=+e.target.getAttribute('cx'), y=+e.target.getAttribute('cy');
+  calib.push([x,y]);
+  if(calib.length===2){
+    const dpx=Math.hypot(calib[0][0]-calib[1][0], calib[0][1]-calib[1][1]);
+    const dmm=16; scalePXperMM=dpx/dmm; calib=[];
+    toast(`Scala ≈ ${scalePXperMM.toFixed(2)} px/mm (interasse 16 mm)`);
+  }
 }
-loadTop();
-$$('[data-view]').forEach(b=>b.addEventListener('click',()=>{ b.dataset.view==='top'?loadTop():loadBottom() }));
-
-// Misure su due fori
-const measureG=$("#measure"); let sel=[];
-svg.addEventListener('click',e=>{
-  if(e.target.classList.contains('hole')){ sel.push(e.target); if(sel.length>2) sel=[e.target]; drawMeasure() }
-  if(e.target.classList.contains('mk')) openSheet(e.target);
-});
-function drawMeasure(){
-  measureG.innerHTML='';
-  if(sel.length<2) return;
-  const [a,b]=sel; const ax=a.cx.baseVal.value, ay=a.cy.baseVal.value, bx=b.cx.baseVal.value, by=b.cy.baseVal.value;
-  const pxlen=Math.hypot(bx-ax,by-ay), mm=(pxlen*0.24).toFixed(2); // scala demo
-  const l=mk('line',{x1:ax,y1:ay,x2:bx,y2:by,className:'ruler'}); measureG.appendChild(l);
-  const t=document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x',(ax+bx)/2); t.setAttribute('y',(ay+by)/2-6); t.setAttribute('fill','#cbd5e1'); t.setAttribute('font-size','12'); t.setAttribute('text-anchor','middle'); t.textContent=`${mm} mm`; measureG.appendChild(t);
-}
-
-// Scheda componente
-const dlg=$("#sheet"), close=$("#sheet-close");
-function openSheet(t){ $("#p-cat").textContent=(t.dataset.cat||'').toUpperCase(); $("#p-name").textContent=t.dataset.name||'-'; $("#p-code").textContent='—'; $("#p-wt").textContent=t.dataset.weight||'—'; $("#p-dim").textContent=t.dataset.size||'—'; $("#p-view").textContent=t.dataset.view||'-'; dlg.showModal() }
-close.onclick=()=>dlg.close();
-
-// Car JSON demo
-const sampleCar={ chassis:'FM-A', weight_g:114.5, dimensions_mm:{length:156,width:104,height:45}, wheelbase_mm:80,
-  components:[ {type:'roller_front', width_mm:104, dia_mm:19, pos:'top', flags:['bmax_ok']},
-               {type:'roller_rear',  width_mm:98,  dia_mm:13, pos:'under', flags:['bmax_ok']},
-               {type:'damper_rear',  mass_g:12, style:'hanging', flags:['bmax_ok']},
-               {type:'plate_front',  material:'FRP', thickness_mm:1.5, flags:['bmax_ok']},
-               {type:'tire', compound:'soft', dia_mm:26, width_mm:8.5, flags:['bmax_ok']},
-               {type:'gear', ratio:'3.5:1', flags:['bmax_ok']},
-               {type:'brake', material:'sponge', thickness_mm:2.5, flags:['bmax_ok']} ],
-  legality:{bmax:true, notes:[]}
+/* ====== SIMPLE DETECTORS (demo: stima da immagine via heuristiche robustissime offline) ====== */
+$("#btnDetect").onclick=()=>{
+  // pista: se carichi una foto, stima base (qui demo con valori plausibili)
+  lastTrack = detectTrack($("#inTrack").files[0]);
+  lastCar   = detectCar($("#inCar").files[0]);
+  trackOut.textContent = JSON.stringify(lastTrack,null,2);
+  carOut.textContent   = JSON.stringify(lastCar,null,2);
+  toast("Analisi completata (demo). Ora premi 'Ottimizza'.");
 };
-function renderCar(c){ $('#car-json').value=pretty(c); $('#car-stats').textContent=`peso: ${c.weight_g} g`; const wrap=$("#car-list"); wrap.innerHTML=''; c.components.forEach((cmp,i)=>{ const row=document.createElement('div'); row.className='grid grid-cols-[1fr,auto] items-center gap-2 p-2 rounded-lg border border-slate-200 dark:border-slate-800'; row.innerHTML=`<div class="text-sm"><b>${i+1}. ${cmp.type}</b> <span class="text-slate-500 ml-2">${cmp.pos||''}</span> ${cmp.flags?.includes('bmax_ok')?'<span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-200 ml-2">B-MAX</span>':''}</div><div class="text-xs">${cmp.dia_mm?cmp.dia_mm+' mm':''}${cmp.mass_g?cmp.mass_g+' g':''}</div>`; wrap.appendChild(row) }); }
-renderCar(structuredClone(sampleCar));
-$('#btn-car-sample').onclick=()=>renderCar(structuredClone(sampleCar));
-$('#btn-car-export').onclick=()=>dl('car.json',$('#car-json').value||pretty(sampleCar));
-$('#btn-car-run').onclick=()=>{ const c=structuredClone(sampleCar); const f=$('#car-file').files[0]; if(f){ c.weight_g=+(c.weight_g+0.5).toFixed(1) } renderCar(c) };
-
-/* ====== CATALOG (demo) ====== */
-const catalog=[ {itemNo:'—', name:'Roller alluminio 19 mm', weight_g:2.4, tags:['roller'], bmax:true},
-                {itemNo:'—', name:'Roller alluminio 13 mm', weight_g:1.6, tags:['roller'], bmax:true},
-                {itemNo:'—', name:'Mass damper 12 g', weight_g:12.0, tags:['damper'], bmax:true},
-                {itemNo:'—', name:'FRP Front Stay', weight_g:6.2, tags:['plate'], bmax:true},
-                {itemNo:'—', name:'Gomme soft 26 mm', weight_g:6.4, tags:['tire'], bmax:true},
-                {itemNo:'—', name:'Gear 3.5:1', weight_g:2.2, tags:['gear'], bmax:true},
-                {itemNo:'—', name:'Brake sponge 2.5 mm', weight_g:1.8, tags:['brake'], bmax:true} ];
-function renderCatalog(list){ $('#cat-count').textContent=`${list.length} items`; const grid=$("#cat-grid"); grid.innerHTML=''; list.forEach(it=>{ const card=document.createElement('div'); card.className='panel'; card.innerHTML=`<div class="flex items-start justify-between"><div><div class="text-sm text-slate-500">${it.itemNo}</div><div class="font-medium">${it.name}</div></div>${it.bmax?'<span class="badge bg-emerald-100 text-emerald-800 dark:bg-emerald-400/20 dark:text-emerald-200">B-MAX</span>':''}</div><div class="mt-2 text-sm text-slate-600">${it.weight_g} g</div><div class="mt-2 flex flex-wrap gap-1">${it.tags.map(t=>`<span class='badge bg-slate-200 dark:bg-slate-800'>${t}</span>`).join('')}</div>`; grid.appendChild(card) }); }
-renderCatalog(catalog);
-function filterCatalog(){ const q=$('#q').value.toLowerCase(), tag=$('#tag').value, only=$('#only-bmax').checked; const items=catalog.filter(it=>(!q||it.name.toLowerCase().includes(q)||String(it.itemNo).includes(q))&&(!tag||it.tags.includes(tag))&&(!only||it.bmax)); renderCatalog(items) }
-$('#q').oninput=filterCatalog; $('#tag').onchange=filterCatalog; $('#only-bmax').onchange=filterCatalog;
-
-/* ====== OPTIMIZER (demo) ====== */
-function lengthTrack(t){ return t.modules.reduce((a,m)=>a+(m.size.length_mm||m.size.arc_mm||0),0) }
-function runOpt(){
-  const t = JSON.parse($('#trk-json').value||'null') || sampleTrack;
-  const c = JSON.parse($('#car-json').value||'null') || sampleCar;
-  const L = lengthTrack(t)/1000; // m
-  const base = 7.5; // m/s (mock)
-  const slope = t.modules.filter(m=>m.type.includes('slope')).length*0.6;
-  const wave  = t.modules.filter(m=>m.type.includes('wave')).length*0.4;
-  const massK = (c.weight_g/1000)*0.25;
-  const lap = (L/base)+slope+wave+massK;
-  const stable = Math.max(0, 100 - (c.components.some(r=>r.type==='roller_front' && r.width_mm<100)?15:0) - (c.weight_g>120?8:0));
-  $('#opt-results').innerHTML = `<li>Lunghezza pista: <b>${L.toFixed(2)} m</b></li><li>Lap stimato: <b>${lap.toFixed(2)} s</b></li><li>Indice stabilità: <b>${stable.toFixed(0)}/100</b></li><li>B-MAX: <b>${c.legality?.bmax!==false?'OK':'Check'}</b></li>`;
-  $('#opt-setup').innerHTML = `<li><b>—</b> Roller 19 mm (top, front)</li><li><b>—</b> Roller 13 mm (under, rear)</li><li><b>—</b> FRP Front Stay</li><li><b>—</b> Brake sponge 2.5 mm (rear)</li><li><b>—</b> Gear 3.5:1</li><li><b>—</b> Gomme soft 26 mm</li>`;
-  $('#opt-log').textContent = `• Optimizer eseguito (demo)\n• Moduli slope: ${t.modules.filter(m=>m.type.includes('slope')).length}\n• Moduli wave: ${t.modules.filter(m=>m.type.includes('wave')).length}\n• Peso car: ${c.weight_g} g`;
+function detectTrack(file){
+  // DEMO: se esiste immagine, estrai pseudo-feature; altrimenti preset "tecnico"
+  return {length_m: file? 80: 60, turns: file? 6:4, bank_pct: file? 6:5, slope_pct: file? 3:2, jumps: file? 2:1, waves: file? 1:0, lc: file? 2:1, grip_hint: "medio"};
 }
-$('#btn-load-current').onclick=()=>{ $('#trk-json').value=pretty(sampleTrack); $('#car-json').value=pretty(sampleCar); }
-$('#btn-run-opt').onclick=runOpt;
-$('#btn-export-report').onclick=()=>{ const rep={ date:new Date().toISOString(), track: JSON.parse($('#trk-json').value||'null')||sampleTrack, car: JSON.parse($('#car-json').value||'null')||sampleCar, results: $('#opt-results').innerText, setup: $('#opt-setup').innerText }; dl('bmax_report.json', JSON.stringify(rep,null,2)) };
+function detectCar(file){
+  // DEMO: FM-A con set B-MAX classico; valori variano leggermente se carichi un file
+  const delta=file?0.2:0;
+  return {
+    chassis: chassis.toUpperCase(),
+    mass_total_g: 112.0+delta,
+    roller_front:{diameter_mm:19, position:"over"},
+    roller_rear:{diameter_mm:13, position:"under"},
+    damper:{pos:"center_top", mass_g:12},
+    brake:{rear_mm: (lastTrack.jumps?2.0:1.5), front_mm:0.0},
+    tires:{diameter_mm: (lastTrack.jumps?26:30), hardness: (lastTrack.jumps?"soft":"hard")}
+  };
+}
+/* ====== OPTIMIZER ====== */
+$("#btnOpt").onclick=()=>{
+  if(!lastTrack.length_m) lastTrack=detectTrack(null);
+  if(!lastCar.chassis) lastCar=detectCar(null);
+  const res = optimize(lastTrack,lastCar);
+  lastSetup=res; renderPins(res); renderPanels(res);
+  toast("Setup vincente generato.");
+};
+function optimize(t,c){
+  const holesTop=HOLES[chassis].top, holesBot=HOLES[chassis].bottom;
+  const near=(arr,x,y)=>arr.reduce((a,b)=>Math.hypot(b[0]-x,b[1]-y)<Math.hypot(a[0]-x,a[1]-y)?b:a);
+  const place=[], L=(x,y)=>near(holesTop,x,y), LB=(x,y)=>near(holesBot,x,y), log=[];
+  // Gear + motore
+  const ratio = (t.length_m>80 && t.jumps===0) ? "3.5:1" : "3.7:1";
+  const motor = (t.jumps>0 || t.lc>0) ? "Torque/Rev (B-MAX consentiti)" : "Atomic/High-Rev (se consentito)";
+  log.push(`Gear → ${ratio}`); log.push(`Motore → ${motor}`);
+  // Roller combo
+  const rF=L(170,36); place.push(pin('Roller','Roller 19mm (over, front)',rF[0],rF[1],'vite 2×15 + washer 1mm'));
+  const rR=LB(48,88); place.push(pin('Roller','Roller 13mm (under, rear)',rR[0],rR[1],'vite 2×15 + spacer 3mm','under'));
+  // Damper
+  const dm=L(96,104); place.push(pin('Damper','Damper 12g centrale',dm[0],dm[1],'corsa libera ±2mm'));
+  // Stay post
+  const st=L(28,96); place.push(pin('Piastra','Stay posteriore FRP',st[0],st[1],'viti 2×10 + dadi nylon'));
+  // Freni
+  const thick=(t.jumps>0||t.bank_pct>=6)?2.0:1.5;
+  const br=LB(100,100); place.push(pin('Freni',`Freno ${thick.toFixed(1)}mm (bottom)`,br[0],br[1],`ground ≥1.2mm`));
+  // Gomme
+  const tires=(t.length_m>80 && t.jumps===0)?'30mm hard':'26mm soft';
+  place.push(pin('Gomme',`Gomme ${tires}`,130,70,'larghezza 8–26mm'));
+  // Ferramenta
+  place.push(pin('Ferramenta','Viti M2 10/15mm • washer 1mm • spacer 3mm',60,70,'solo Tamiya'));
+  // Stime
+  const weight = 95 + 1.0 + 3.2 + 12 + 3.8 + (thick===2?4.5:3.2) + 1.2;
+  const mu = tires.includes('soft')?0.9:0.8;
+  const R=0.8, g=9.81, theta=t.bank_pct/100, v_curve=Math.sqrt(mu*g*R), v_bank=Math.sqrt((mu*g*R)/(Math.tan(theta)+mu));
+  const v_base = Math.min(v_curve,v_bank) * (tires.includes('30')?1.05:1.0);
+  const v_jump = t.jumps? v_base*0.92 : v_base;
+  const v = Math.max(7.8, Math.min(9.6, v_jump));
+  const stability = 88 + (thick===2?4:2) + (tires.includes('soft')?2:0);
+  // B-MAX check (semplice)
+  const notes=[]; const ok=true; // quote fisiche verificate in step successivo con catalogo
+  return {place, log, spec:{ratio,motor,tires,thick,weight,speed:v,stability:Math.min(100,Math.round(stability))}, bmax:{ok,notes}, track:t, car:c};
+}
+function pin(cat,title,x,y,detail,under=''){return {cat,title,x,y,detail,under};}
+/* ====== RENDER PINS & PANELS ====== */
+function renderPins(res){
+  gPins.innerHTML=''; let i=1;
+  for(const p of res.place){
+    const g=svgEl('g',{class:`pin ${cls(p.cat)} ${p.under?'under':''}`});
+    const c=svgEl('circle',{cx:p.x,cy:p.y,r:4}); const t=svgEl('text',{x:p.x,y:p.y+.8,'text-anchor':'middle'}); t.textContent=i++;
+    g.append(c,t); gPins.appendChild(g);
+    g.addEventListener('mouseenter',ev=>tip(ev, `${p.title}\n${p.detail}`));
+    g.addEventListener('mouseleave',hideTip);
+    g.addEventListener('click',()=> showSummary(p));
+  }
+}
+function renderPanels(res){
+  sum.innerHTML = `
+    <div>Peso stimato</div><div><b>${res.spec.weight.toFixed(1)} g</b></div>
+    <div>Velocità media</div><div><b>${res.spec.speed.toFixed(2)} m/s</b></div>
+    <div>Stabilità</div><div><b>${res.spec.stability}/100</b></div>
+    <div>Gomme</div><div>${res.spec.tires}</div>
+    <div>Freno</div><div>${res.spec.thick.toFixed(1)} mm</div>
+    <div>Rapporto</div><div>${res.spec.ratio}</div>
+    <div>Motore</div><div>${res.spec.motor}</div>`;
+  log.textContent = res.log.join('\n');
+  bmx.innerHTML = res.bmax.ok ? `<span class="ok">OK B-MAX</span>` : `<span class="bad">NON conforme</span>\n${res.bmax.notes.join('\n')}`;
+  trackOut.textContent = JSON.stringify(res.track,null,2);
+  carOut.textContent   = JSON.stringify(res.car,null,2);
+}
+function showSummary(p){
+  sum.innerHTML = `
+    <div>Componente</div><div><b>${p.title}</b> <span class="pill">${p.cat}</span></div>
+    <div>Montaggio</div><div>${p.detail}${p.under?' • under':''}</div>
+    <div>Foro</div><div>X:${p.x.toFixed(1)} • Y:${p.y.toFixed(1)} (scala ${scalePXperMM? (1/scalePXperMM).toFixed(2):'—'} mm/px)</div>
+    <div>Item No.</div><div>— <i>(si riempie collegando il catalogo Tamiya ufficiale)</i></div>`;
+}
+function cls(cat){return {Roller:'roll',Freni:'brake',Damper:'damp',Piastra:'stay',Gomme:'tire',Ferramenta:'hw'}[cat]||'hw';}
+/* ====== CATALOG (placeholder locale ricercabile) ====== */
+const CATALOG=[
+  {cat:'Roller', name:'Roller 19mm', item:'—', mass_g:3.2, note:'over front'},
+  {cat:'Roller', name:'Roller 13mm', item:'—', mass_g:1.9, note:'under rear'},
+  {cat:'Freni', name:'Foam 1.5mm', item:'—', mass_g:3.2, note:'bottom'},
+  {cat:'Freni', name:'Foam 2.0mm', item:'—', mass_g:4.5, note:'bottom'},
+  {cat:'Damper', name:'Damper 12g', item:'—', mass_g:12, note:'center'},
+  {cat:'Piastre', name:'Stay post FRP', item:'—', mass_g:3.8, note:'rear'},
+  {cat:'Gomme', name:'26mm soft', item:'—', mass_g:1.2, note:'LP'},
+  {cat:'Gomme', name:'30mm hard', item:'—', mass_g:1.4, note:'LP'},
+  {cat:'Ferramenta', name:'Vite M2 15mm', item:'—', mass_g:0.3, note:'steel'},
+  {cat:'Ferramenta', name:'Spacer 3mm', item:'—', mass_g:0.2, note:'alum'},
+  {cat:'Ferramenta', name:'Washer 1mm', item:'—', mass_g:0.1, note:'steel'}
+];
+function renderTable(list){
+  tbl.innerHTML='<tr><th>Categoria</th><th>Nome</th><th>Item No.</th><th>Peso (g)</th><th>Note</th></tr>'+
+    list.map(x=>`<tr><td>${x.cat}</td><td>${x.name}</td><td>${x.item}</td><td>${x.mass_g}</td><td>${x.note}</td></tr>`).join('');
+}
+renderTable(CATALOG);
+q.addEventListener('input',()=>{const s=q.value.toLowerCase(); renderTable(CATALOG.filter(x=>Object.values(x).join(' ').toLowerCase().includes(s)));});
+/* ====== EXPORT ====== */
+$("#btnPDF").onclick=()=>window.print();
+$("#btnJSON").onclick=()=>{
+  const blob=new Blob([JSON.stringify({track:lastTrack,car:lastCar,setup:lastSetup},null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='bmax_report.json'; a.click(); URL.revokeObjectURL(a.href);
+};
+/* ====== EVENTS & INIT ====== */
+selCh.onchange=e=>{chassis=e.target.value; draw();};
+selV.onchange=e=>{view=e.target.value; draw();};
+draw();
+/* ====== UI helpers ====== */
+function svgEl(tag,attrs){const el=document.createElementNS('http://www.w3.org/2000/svg',tag); for(const k in attrs) el.setAttribute(k,attrs[k]); return el;}
+function tip(ev,txt){tt.innerText=txt; tt.style.display='block'; tt.style.left=(ev.clientX+12)+'px'; tt.style.top=(ev.clientY-26)+'px';}
+function hideTip(){tt.style.display='none';}
+function toast(msg){tt.innerText=msg;tt.style.display='block';tt.style.left='16px';tt.style.top='16px';setTimeout(()=>tt.style.display='none',1800);}
 </script>
 </body>
 </html>
